@@ -55,7 +55,7 @@ export default function TermsPage() {
                     <div className="lg:col-span-3 card p-8">
                         <div className="prose prose-invert max-w-none">
                             <p className="text-slate-300 mb-8">
-                                Welcome to BookScanner. By accessing or using our website and services, you agree to be bound
+                                Welcome to ApicBooks. By accessing or using our website and services, you agree to be bound
                                 by these Terms of Service. Please read them carefully.
                             </p>
 
@@ -64,7 +64,7 @@ export default function TermsPage() {
                                     1. Acceptance of Terms
                                 </h2>
                                 <p className="text-slate-300">
-                                    By accessing or using BookScanner ("Service"), you agree to be bound by these Terms of Service
+                                    By accessing or using ApicBooks ("Service"), you agree to be bound by these Terms of Service
                                     and all applicable laws and regulations. If you do not agree with any of these terms, you are
                                     prohibited from using or accessing this site.
                                 </p>
@@ -75,7 +75,7 @@ export default function TermsPage() {
                                     2. Description of Service
                                 </h2>
                                 <p className="text-slate-300 mb-4">
-                                    BookScanner provides a book price comparison service that:
+                                    ApicBooks provides a book price comparison service that:
                                 </p>
                                 <ul className="list-disc list-inside text-slate-300 space-y-2 ml-4">
                                     <li>Aggregates book prices from multiple online retailers</li>
@@ -123,7 +123,7 @@ export default function TermsPage() {
                                     5. Intellectual Property
                                 </h2>
                                 <p className="text-slate-300">
-                                    The Service and its original content, features, and functionality are owned by BookScanner
+                                    The Service and its original content, features, and functionality are owned by ApicBooks
                                     and are protected by international copyright, trademark, and other intellectual property laws.
                                     Book cover images and retailer logos are property of their respective owners.
                                 </p>
@@ -149,7 +149,7 @@ export default function TermsPage() {
                                     7. Limitation of Liability
                                 </h2>
                                 <p className="text-slate-300">
-                                    BookScanner shall not be liable for any indirect, incidental, special, consequential, or
+                                    ApicBooks shall not be liable for any indirect, incidental, special, consequential, or
                                     punitive damages resulting from your use of the Service. Our total liability shall not
                                     exceed the amount paid by you, if any, for accessing the Service.
                                 </p>
@@ -183,8 +183,8 @@ export default function TermsPage() {
                                 </h2>
                                 <p className="text-slate-300">
                                     If you have questions about these Terms, please contact us at{' '}
-                                    <a href="mailto:legal@bookscanner.com" className="text-primary-400 hover:text-primary-300">
-                                        legal@bookscanner.com
+                                    <a href="mailto:legal@apicbooks.com" className="text-primary-400 hover:text-primary-300">
+                                        legal@apicbooks.com
                                     </a>{' '}
                                     or visit our{' '}
                                     <Link href="/contact" className="text-primary-400 hover:text-primary-300">

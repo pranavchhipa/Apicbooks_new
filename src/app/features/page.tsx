@@ -128,7 +128,7 @@ export default function FeaturesPage() {
                                 The Smart Way to Buy Books
                             </h2>
                             <p className="text-slate-300 mb-8">
-                                Stop wasting time checking multiple websites. BookScanner does the hard work
+                                Stop wasting time checking multiple websites. ApicBooks does the hard work
                                 so you can focus on what matters—reading great books.
                             </p>
                             <ul className="space-y-4">
@@ -157,7 +157,7 @@ export default function FeaturesPage() {
                                         <thead>
                                             <tr className="border-b border-slate-700">
                                                 <th className="text-left py-3 text-slate-400 font-medium">Feature</th>
-                                                <th className="text-center py-3 text-primary-400 font-medium">BookScanner</th>
+                                                <th className="text-center py-3 text-primary-400 font-medium">ApicBooks</th>
                                                 <th className="text-center py-3 text-slate-400 font-medium">Others</th>
                                             </tr>
                                         </thead>
@@ -191,7 +191,7 @@ export default function FeaturesPage() {
                                 Ready to Save Money?
                             </h2>
                             <p className="text-slate-300 mb-8 max-w-lg mx-auto">
-                                Join millions of readers who use BookScanner to find the best deals.
+                                Join millions of readers who use ApicBooks to find the best deals.
                                 No registration required—start searching now.
                             </p>
                             <Link href="/" className="btn-primary px-8 py-4 text-lg inline-flex items-center gap-2">

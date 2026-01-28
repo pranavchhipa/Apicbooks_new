@@ -53,7 +53,7 @@ export default function PrivacyPage() {
                     <div className="lg:col-span-3 card p-8">
                         <div className="prose prose-invert max-w-none">
                             <p className="text-slate-300 mb-8">
-                                At BookScanner, we take your privacy seriously. This Privacy Policy explains how we collect,
+                                At ApicBooks, we take your privacy seriously. This Privacy Policy explains how we collect,
                                 use, disclose, and safeguard your information when you use our website and services.
                             </p>
 
@@ -157,8 +157,8 @@ export default function PrivacyPage() {
                                 </h2>
                                 <p className="text-slate-300">
                                     If you have questions about this Privacy Policy, please contact us at{' '}
-                                    <a href="mailto:privacy@bookscanner.com" className="text-primary-400 hover:text-primary-300">
-                                        privacy@bookscanner.com
+                                    <a href="mailto:privacy@apicbooks.com" className="text-primary-400 hover:text-primary-300">
+                                        privacy@apicbooks.com
                                     </a>{' '}
                                     or visit our{' '}
                                     <Link href="/contact" className="text-primary-400 hover:text-primary-300">

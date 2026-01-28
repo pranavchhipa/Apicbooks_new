@@ -7,8 +7,8 @@ const contactInfo = [
     {
         icon: Mail,
         label: 'Email',
-        value: 'hello@bookscanner.com',
-        href: 'mailto:hello@bookscanner.com',
+        value: 'hello@apicbooks.com',
+        href: 'mailto:hello@apicbooks.com',
         color: 'from-primary-500 to-primary-600'
     },
     {
@@ -36,12 +36,12 @@ const contactInfo = [
 
 const faqs = [
     {
-        question: 'How does BookScanner compare prices?',
+        question: 'How does ApicBooks compare prices?',
         answer: 'We search across 150+ retailers in real-time to find the best prices for both new and used books. Our system updates prices regularly to ensure accuracy.'
     },
     {
-        question: 'Is BookScanner free to use?',
-        answer: 'Yes! BookScanner is completely free for all users. We earn a small commission from retailers when you make a purchase through our links, at no extra cost to you.'
+        question: 'Is ApicBooks free to use?',
+        answer: 'Yes! ApicBooks is completely free for all users. We earn a small commission from retailers when you make a purchase through our links, at no extra cost to you.'
     },
     {
         question: 'How does the AI mood search work?',

@@ -5,8 +5,8 @@ import { Toaster } from 'sonner';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 
 export const metadata: Metadata = {
-    title: 'BookScanner - Find the Best Book Prices',
-    description: 'The Skyscanner for Books - Search once, compare prices everywhere. AI-powered mood-based book discovery.',
+    title: 'ApicBooks - Your Ultimate Reading Companion',
+    description: 'Join the community of readers. Track your reading journey, discover new books, and connect with friends. Your personal library, elevated.',
     icons: {
         icon: '/icon.jpg',
         shortcut: '/icon.jpg',

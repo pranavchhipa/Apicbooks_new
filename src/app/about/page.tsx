@@ -38,7 +38,7 @@ const team = [
 ];
 
 const timeline = [
-    { year: '2023', title: 'The Beginning', description: 'BookScanner was founded with a simple mission: help readers find affordable books.' },
+    { year: '2023', title: 'The Beginning', description: 'ApicBooks was founded with a simple mission: help readers find affordable books.' },
     { year: '2024', title: 'AI Launch', description: 'Introduced mood-based search powered by AI, revolutionizing book discovery.' },
     { year: '2025', title: 'Global Expansion', description: 'Expanded to 50+ countries with 150+ retailer partnerships.' },
     { year: '2026', title: 'Community First', description: 'Launched wishlist features and price alerts based on user feedback.' },
@@ -63,7 +63,7 @@ export default function AboutPage() {
                     </h1>
                     <p className="text-xl text-slate-300 max-w-2xl mx-auto">
                         We believe everyone deserves access to great literature without breaking the bank.
-                        BookScanner helps you find the best prices across hundreds of retailers.
+                        ApicBooks helps you find the best prices across hundreds of retailers.
                     </p>
                 </div>
             </section>
@@ -79,7 +79,7 @@ export default function AboutPage() {
                             </h2>
                             <p className="text-slate-300 mb-6">
                                 In a world where book prices vary dramatically across retailers, we saw an opportunity
-                                to level the playing field. BookScanner was born from frustration—spending hours
+                                to level the playing field. ApicBooks was born from frustration—spending hours
                                 comparing prices across websites just to find a good deal.
                             </p>
                             <p className="text-slate-300 mb-6">
