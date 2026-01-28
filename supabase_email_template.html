@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm your signup</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0f172a; margin: 0; padding: 0; color: #e2e8f0;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; padding: 40px; border-radius: 12px; margin-top: 40px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+    
+    <!-- Logo -->
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: bold; margin: 0;">ApicBooks</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="text-align: center;">
+      <h2 style="color: #ffffff; font-size: 20px; margin-bottom: 20px;">Welcome to the Club! 📚</h2>
+      <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+        You're just one step away from tracking your reading journey. Please confirm your email address to get started.
+      </p>
+
+      <!-- Button -->
+      <a href="{{ .ConfirmationURL }}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 30px; transition: background-color 0.2s;">
+        Confirm Email
+      </a>
+
+      <p style="color: #64748b; font-size: 14px; margin-top: 20px;">
+        or copy this link: <br>
+        <a href="{{ .ConfirmationURL }}" style="color: #3b82f6; word-break: break-all;">{{ .ConfirmationURL }}</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top: 1px solid #334155; margin-top: 40px; padding-top: 20px; text-align: center;">
+      <p style="color: #64748b; font-size: 12px;">
+        © 2024 ApicBooks Inc. All rights reserved.<br>
+        If you didn't request this email, you can safely ignore it.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

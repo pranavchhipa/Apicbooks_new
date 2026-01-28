@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+  <rect width="100" height="40" fill="#003366"/>
+  <text x="10" y="28" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">Barnes</text>
+  <text x="58" y="28" font-family="Arial" font-size="18" fill="#FFFFFF">&amp;</text>
+  <text x="70" y="28" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">Noble</text>
+</svg>

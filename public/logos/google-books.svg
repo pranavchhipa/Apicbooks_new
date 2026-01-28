@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+  <circle cx="20" cy="20" r="15" fill="#4285F4"/>
+  <circle cx="20" cy="20" r="8" fill="#FFFFFF"/>
+  <rect x="28" y="28" width="15" height="6" rx="2" fill="#34A853" transform="rotate(-45 28 28)"/>
+  <text x="42" y="28" font-family="Product Sans, Arial" font-size="14" fill="#5F6368">Books</text>
+</svg>

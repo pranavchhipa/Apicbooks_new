@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+  <rect x="20" y="5" width="60" height="30" rx="3" fill="#FFE11B"/>
+  <rect x="35" y="0" width="30" height="8" rx="2" fill="#FFE11B"/>
+  <path d="M35 5 L35 0 M65 5 L65 0" stroke="#047BD5" stroke-width="2"/>
+  <text x="30" y="28" font-family="Arial" font-size="18" font-weight="bold" fill="#047BD5">f</text>
+  <path d="M45 20 L70 20" stroke="#047BD5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M65 16 L72 20 L65 24" fill="#047BD5"/>
+</svg>
