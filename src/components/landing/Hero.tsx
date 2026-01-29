@@ -38,7 +38,7 @@ export default function Hero() {
                     className="max-w-2xl mx-auto mb-10"
                 >
                     <p className="text-lg md:text-xl text-slate-400 leading-relaxed">
-                        The ultimate companion for book lovers. Track your reading stats, get price drop alerts from 100+ stores, and discover community favorites.
+                        The ultimate companion for book lovers. Track your reading stats, get price drop alerts from multiple sources, and discover community favorites.
                     </p>
                 </motion.div>
 
