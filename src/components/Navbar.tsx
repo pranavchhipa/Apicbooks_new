@@ -121,8 +121,8 @@ export default function Navbar({ user }: NavbarProps) {
 
                 {/* Mobile Navigation */}
                 <div className={`
-                    md:hidden overflow-hidden transition-all duration-300
-                    ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+                    md:hidden overflow-y-auto transition-all duration-300
+                    ${isMenuOpen ? 'max-h-[calc(100vh-5rem)] opacity-100' : 'max-h-0 opacity-0'}
                 `}>
                     <div className="py-4 border-t border-[#1e2749] space-y-2">
                         {navLinks.map((link) => (

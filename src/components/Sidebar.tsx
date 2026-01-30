@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed = false, onToggle
             ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             ${isCollapsed ? 'w-20' : 'w-64'}
         `}>
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col overflow-y-auto no-scrollbar">
                 <div className="h-16 flex items-center border-b border-slate-200 dark:border-[#1e2749] overflow-hidden justify-center p-0">
                     <Link href="/dashboard" className="flex items-center group w-full h-full">
                         {isCollapsed ? (

@@ -341,7 +341,7 @@ export default function CurrentlyReading() {
                         </div>
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             {[1, 2, 3, 4].map(i => (
                                 <div key={i} className="h-24 bg-[#1e2749] rounded-xl" />
                             ))}
@@ -516,7 +516,7 @@ export default function CurrentlyReading() {
                             </div>
 
                             {/* Stats Row */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl p-3 text-center">
                                     <Clock className="w-4 h-4 text-primary-400 mx-auto mb-1" />
                                     <p className="text-lg font-bold text-white">{formatMinutes(selectedBook.total_minutes_read || 0)}</p>

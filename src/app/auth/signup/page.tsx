@@ -80,7 +80,7 @@ export default function SignupPage() {
 
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#0f172a] overflow-hidden">
+        <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#0f172a] overflow-y-auto">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
                 <Image

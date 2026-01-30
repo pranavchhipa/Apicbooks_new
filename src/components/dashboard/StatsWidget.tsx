@@ -89,7 +89,7 @@ export default function StatsWidget() {
 
     if (loading) {
         return (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[...Array(4)].map((_, i) => (
                     <div key={i} className="h-36 rounded-2xl bg-[#141b3d]/60 border border-[#1e2749] animate-pulse" />
                 ))}
@@ -102,7 +102,7 @@ export default function StatsWidget() {
 
     return (
         <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Books Read Card */}
                 <div className="group relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 hover:border-primary-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/20 to-transparent rounded-bl-full" />
