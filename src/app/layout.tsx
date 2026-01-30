@@ -3,6 +3,10 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from 'sonner';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { Inter, Outfit } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
     title: 'ApicBooks - Your Ultimate Reading Companion',
@@ -20,8 +24,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" suppressHydrationWarning>
-            <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary-500/30">
+        <html lang="en" suppressHydrationWarning className={`${inter.variable} ${outfit.variable}`}>
+            <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary-500/30 font-sans">
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"

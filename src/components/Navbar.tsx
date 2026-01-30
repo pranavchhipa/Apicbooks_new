@@ -6,9 +6,10 @@ import { User, Menu, X, LogOut, Layers, MessageSquare, Tag } from 'lucide-react'
 import { usePathname } from 'next/navigation';
 import Logo from '@/components/Logo';
 
+import { createClient } from '@/lib/supabase/client';
+
 interface NavbarProps {
-    user?: { email: string } | null;
-    onLogout?: () => void;
+    user?: { email?: string } | null;
 }
 
 const navLinks = [
@@ -16,10 +17,16 @@ const navLinks = [
     { href: '#community', label: 'Community', icon: MessageSquare },
 ];
 
-export default function Navbar({ user, onLogout }: NavbarProps) {
+export default function Navbar({ user }: NavbarProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const pathname = usePathname();
+    const supabase = createClient();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        window.location.reload();
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -79,7 +86,7 @@ export default function Navbar({ user, onLogout }: NavbarProps) {
                                     Dashboard
                                 </Link>
                                 <button
-                                    onClick={onLogout}
+                                    onClick={handleLogout}
                                     className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#1e2749] text-slate-400 hover:text-white transition-colors"
                                 >
                                     <LogOut className="w-4 h-4" />
@@ -146,7 +153,7 @@ export default function Navbar({ user, onLogout }: NavbarProps) {
                                     Go to Dashboard
                                 </Link>
                                 <button
-                                    onClick={() => { onLogout?.(); setIsMenuOpen(false); }}
+                                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                                     className="flex items-center justify-center w-full gap-2 px-4 py-3 rounded-xl hover:bg-[#1e2749] text-slate-400 hover:text-white"
                                 >
                                     <LogOut className="w-4 h-4" />

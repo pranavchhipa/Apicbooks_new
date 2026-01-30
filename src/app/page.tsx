@@ -1,35 +1,18 @@
-'use client';
-
 import { Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/landing/Hero';
 import FeaturesGrid from '@/components/landing/FeaturesGrid';
 import ValueProps from '@/components/landing/ValueProps';
 import { CTA, Footer } from '@/components/landing/FooterCTA';
-import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/server';
 
-function LandingPage() {
-    const [user, setUser] = useState<any>(null);
-    const supabase = createClient();
-
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-        };
-        getUser();
-    }, []);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-        window.location.reload();
-    };
+async function LandingPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     return (
         <main className="min-h-screen bg-slate-950 text-slate-200 selection:bg-primary-500/30 selection:text-white">
-            <Navbar user={user} onLogout={handleLogout} />
+            <Navbar user={user} />
 
             <Hero />
             <FeaturesGrid />
