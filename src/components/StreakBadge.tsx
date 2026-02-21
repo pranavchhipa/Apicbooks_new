@@ -78,14 +78,14 @@ export default function StreakBadge({
                 </span>
 
                 {/* Day label */}
-                <span className={`${s.subtext} text-slate-400 font-normal`}>
+                <span className={`${s.subtext} text-muted-foreground font-normal`}>
                     {currentStreak === 1 ? 'day' : 'days'}
                 </span>
 
                 {/* Milestone indicator */}
                 {isMilestone && (
                     <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full p-0.5">
-                        <Zap className="w-3 h-3 text-white" />
+                        <Zap className="w-3 h-3 text-foreground" />
                     </div>
                 )}
             </div>

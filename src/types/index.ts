@@ -15,6 +15,8 @@ export interface Book {
     readLink?: string; // URL to Open Library reader
     audiobookUrl?: string; // URL to LibriVox audiobook page
     audiobookDuration?: string;
+    seriesName?: string | null;
+    seriesOrder?: number | null;
 }
 
 export interface Price {
@@ -126,4 +128,18 @@ export interface MoodState {
     results: BookWithPrices[];
     aiExplanation: string | null;
     error: string | null;
+}
+
+// Series types
+export type SeriesRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface SeriesRequest {
+    id: string;
+    bookId: string;
+    bookTitle: string;
+    suggestedSeries: string | null;
+    suggestedOrder: number | null;
+    userId: string | null;
+    status: SeriesRequestStatus;
+    createdAt: string;
 }

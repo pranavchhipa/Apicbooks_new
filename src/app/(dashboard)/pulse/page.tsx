@@ -48,28 +48,28 @@ export default function FeedPage() {
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-3xl font-display font-bold text-white flex items-center gap-3">
-                        <span className="p-2 rounded-xl bg-primary-500/20 border border-primary-500/30">
-                            <Activity className="w-6 h-6 text-primary-400" />
+                    <h1 className="text-3xl font-display font-bold text-foreground dark:text-white flex items-center gap-3">
+                        <span className="p-2 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 border border-primary-500/20 dark:border-primary-500/30">
+                            <Activity className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                         </span>
                         <span className="gradient-text">Pulse</span>
                         <SectionGuideButton section="pulse" />
                     </h1>
-                    <p className="text-slate-400 mt-2">The heartbeat of the community</p>
+                    <p className="text-slate-600 dark:text-slate-400 mt-2">The heartbeat of the community</p>
                 </div>
             </div>
 
             {/* ... (Filter Tabs and Feed) ... */}
 
             {/* Filter Tabs */}
-            <div className="flex gap-2 p-1 bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl w-fit">
+            <div className="flex gap-2 p-1 bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl w-fit">
                 {filters.map((f) => (
                     <button
                         key={f.key}
                         onClick={() => setFilter(f.key)}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === f.key
-                            ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/10 text-white border border-primary-500/30'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                            ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/10 text-primary-600 dark:text-white border border-primary-500/30'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                             }`}
                     >
                         {f.icon}
@@ -79,7 +79,7 @@ export default function FeedPage() {
             </div>
 
             {/* Activity Feed */}
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+            <div className="bg-white/80 dark:bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
                 <ActivityFeed
                     userId={filter === 'me' ? userId : undefined}
                     followingIds={filter === 'following' ? followingIds : undefined}

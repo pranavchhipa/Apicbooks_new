@@ -10,6 +10,7 @@ import FeaturesGuideModal from '@/components/dashboard/FeaturesGuideModal';
 import ProfileSetupModal from '@/components/dashboard/ProfileSetupModal';
 import ReadingAnalytics from '@/components/dashboard/ReadingAnalytics';
 import SmartRecommendations from '@/components/dashboard/SmartRecommendations';
+import DailyQuote from '@/components/dashboard/DailyQuote';
 import StreakBadge from '@/components/StreakBadge';
 import { ReadingGoalCompact } from '@/components/ReadingGoalProgress';
 import type { BookWithPrices } from '@/types';
@@ -191,13 +192,13 @@ function HomeContent() {
                         <span className="gradient-text">Overview</span>
                         <button
                             onClick={() => setIsGuideOpen(true)}
-                            className="p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                            className="p-1.5 rounded-full bg-[#f3efe8] dark:bg-[#241e36] text-[#8b7355] dark:text-[#a39484] hover:text-[#2c1810] dark:hover:text-[#f5f0eb] hover:bg-[#ebe5dc] dark:hover:bg-[#2d2545] transition-colors"
                             title="How ApicBooks works"
                         >
                             <Info className="w-4 h-4" />
                         </button>
                     </h1>
-                    <p className="text-slate-400">Welcome back, {userName}</p>
+                    <p className="text-muted-foreground">Welcome back, {userName}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Link
@@ -209,9 +210,9 @@ function HomeContent() {
                     </Link>
                     <Link
                         href="/my-books"
-                        className="flex items-center gap-2 px-4 py-2 bg-[#141b3d] border border-[#1e2749] text-white rounded-xl hover:bg-[#1e2749] transition-all font-medium text-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1528] border border-[#e0d5c7] dark:border-[#2d2545] text-foreground rounded-xl hover:bg-[#f3efe8] dark:hover:bg-[#241e36] transition-all font-medium text-sm"
                     >
-                        <BookOpen className="w-4 h-4 text-slate-400" />
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />
                         My Books
                     </Link>
                 </div>
@@ -240,6 +241,9 @@ function HomeContent() {
                         </div>
                         <ReadingGoalCompact booksRead={userStats.booksRead} goalBooks={userStats.goal} />
                     </div>
+
+                    {/* Daily Quote */}
+                    <DailyQuote />
                 </div>
             </div>
 
@@ -250,11 +254,11 @@ function HomeContent() {
                     <BestSellersList />
                 </div>
             ) : (
-                <div className="py-12 text-center space-y-4 bg-[#141b3d]/30 border border-[#1e2749] rounded-2xl border-dashed">
-                    <Sparkles className="w-12 h-12 text-slate-600 mx-auto" />
+                <div className="py-12 text-center space-y-4 bg-[#f3efe8]/50 dark:bg-[#1a1528]/30 border border-[#e0d5c7] dark:border-[#2d2545] rounded-2xl border-dashed">
+                    <Sparkles className="w-12 h-12 text-[#8b7355]/40 dark:text-[#a39484]/40 mx-auto" />
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Recommendations Paused</h3>
-                        <p className="text-slate-400 max-w-sm mx-auto">Complete your profile setup to get personalized book suggestions.</p>
+                        <h3 className="text-lg font-semibold text-foreground">Recommendations Paused</h3>
+                        <p className="text-muted-foreground max-w-sm mx-auto">Complete your profile setup to get personalized book suggestions.</p>
                     </div>
                 </div>
             )}
@@ -280,7 +284,7 @@ export default function Home() {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 rounded-full border-4 border-primary-500/30 border-t-primary-500 animate-spin" />
-                    <p className="text-slate-400">Loading ApicBooks...</p>
+                    <p className="text-muted-foreground">Loading ApicBooks...</p>
                 </div>
             </div>
         }>

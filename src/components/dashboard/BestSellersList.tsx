@@ -36,13 +36,13 @@ export default function BestSellersList() {
 
     if (!hasKey) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-5 h-5 text-accent-400" />
-                    <h2 className="text-xl font-bold text-white">Trending Now</h2>
+                    <h2 className="text-xl font-bold text-foreground">Trending Now</h2>
                 </div>
                 <div className="text-center py-6">
-                    <p className="text-slate-400 text-sm mb-2">NYT API Key Not Configured</p>
+                    <p className="text-muted-foreground text-sm mb-2">NYT API Key Not Configured</p>
                     <p className="text-xs text-slate-500">Add NEXT_PUBLIC_NYT_API_KEY to .env.local to see real-time Best Sellers.</p>
                 </div>
             </div>
@@ -50,22 +50,22 @@ export default function BestSellersList() {
     }
 
     return (
-        <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+        <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-accent-500/20 border border-accent-500/30">
                         <TrendingUp className="w-5 h-5 text-accent-400" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white">NYT Best Sellers</h2>
-                        <p className="text-xs text-slate-400">Top Fiction This Week</p>
+                        <h2 className="text-xl font-bold text-foreground">NYT Best Sellers</h2>
+                        <p className="text-xs text-muted-foreground">Top Fiction This Week</p>
                     </div>
                 </div>
                 <a
                     href="https://www.nytimes.com/books/best-sellers/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium px-3 py-1.5 rounded-full bg-[#1e2749] hover:bg-primary-500/20 text-slate-300 hover:text-white transition-all flex items-center gap-1"
+                    className="text-xs font-medium px-3 py-1.5 rounded-full bg-elevated hover:bg-primary-500/20 text-white/80 hover:text-foreground transition-all flex items-center gap-1"
                 >
                     View All <ExternalLink className="w-3 h-3" />
                 </a>
@@ -75,9 +75,9 @@ export default function BestSellersList() {
                 <div className="flex gap-4 overflow-hidden">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                         <div key={i} className="min-w-[140px] space-y-3">
-                            <div className="aspect-[2/3] bg-[#1e2749] rounded-xl animate-pulse" />
-                            <div className="h-4 w-3/4 bg-[#1e2749] rounded animate-pulse" />
-                            <div className="h-3 w-1/2 bg-[#1e2749] rounded animate-pulse" />
+                            <div className="aspect-[2/3] bg-card-border rounded-xl animate-pulse" />
+                            <div className="h-4 w-3/4 bg-card-border rounded animate-pulse" />
+                            <div className="h-3 w-1/2 bg-card-border rounded animate-pulse" />
                         </div>
                     ))}
                 </div>
@@ -85,7 +85,7 @@ export default function BestSellersList() {
                 <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#1e2749] scrollbar-track-transparent hover:scrollbar-thumb-primary-500/30">
                     {books.map((book) => (
                         <div key={book.primary_isbn13} className="snap-start flex-shrink-0 w-[140px] group flex flex-col">
-                            <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg border border-[#1e2749] group-hover:border-primary-500/50 transition-all duration-300 group-hover:-translate-y-1 mb-3">
+                            <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg border border-card-border group-hover:border-primary-500/50 transition-all duration-300 group-hover:-translate-y-1 mb-3">
                                 <Image
                                     src={book.book_image}
                                     alt={book.title}
@@ -94,7 +94,7 @@ export default function BestSellersList() {
                                     sizes="140px"
                                 />
                                 <div className="absolute top-2 left-2 w-8 h-8 bg-black/60 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/10">
-                                    <span className="text-lg font-bold text-white">#{book.rank}</span>
+                                    <span className="text-lg font-bold text-foreground">#{book.rank}</span>
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                                     <a
@@ -108,11 +108,11 @@ export default function BestSellersList() {
                                 </div>
                             </div>
 
-                            <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight mb-1 group-hover:text-primary-400 transition-colors" title={book.title}>
+                            <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight mb-1 group-hover:text-primary-400 transition-colors" title={book.title}>
                                 {book.title}
                             </h3>
-                            <p className="text-xs text-slate-400 truncate mb-1">by {book.author}</p>
-                            <span className="text-[10px] text-slate-500 bg-[#1e2749]/50 px-2 py-0.5 rounded-full w-fit">
+                            <p className="text-xs text-muted-foreground truncate mb-1">by {book.author}</p>
+                            <span className="text-[10px] text-slate-500 bg-elevated/50 px-2 py-0.5 rounded-full w-fit">
                                 {book.weeks_on_list} wks on list
                             </span>
                         </div>

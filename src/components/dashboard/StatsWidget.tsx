@@ -91,7 +91,7 @@ export default function StatsWidget() {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-36 rounded-2xl bg-[#141b3d]/60 border border-[#1e2749] animate-pulse" />
+                    <div key={i} className="h-36 rounded-2xl bg-[#141b3d]/60 border border-card-border animate-pulse" />
                 ))}
             </div>
         );
@@ -104,7 +104,7 @@ export default function StatsWidget() {
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Books Read Card */}
-                <div className="group relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 hover:border-primary-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 overflow-hidden">
+                <div className="group relative bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6 hover:border-primary-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/20 to-transparent rounded-bl-full" />
                     <div className="relative">
                         <div className="flex items-center justify-between mb-4">
@@ -115,13 +115,13 @@ export default function StatsWidget() {
                                 +{stats.readThisMonth} this month
                             </span>
                         </div>
-                        <p className="text-sm text-slate-400 mb-1">Books Read</p>
-                        <p className="text-4xl font-bold text-white max-lg:text-3xl">{stats.readCount}</p>
+                        <p className="text-sm text-muted-foreground mb-1">Books Read</p>
+                        <p className="text-4xl font-bold text-foreground max-lg:text-3xl">{stats.readCount}</p>
                     </div>
                 </div>
 
                 {/* Level / XP Card (Replaces Yearly Goal) */}
-                <div className="group relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 hover:border-accent-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-accent-500/10 overflow-hidden">
+                <div className="group relative bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6 hover:border-accent-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-accent-500/10 overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent-500/20 to-transparent rounded-bl-full" />
                     <div className="relative">
                         <div className="flex items-center justify-between mb-4">
@@ -133,9 +133,9 @@ export default function StatsWidget() {
                                 Lvl {stats.level}
                             </span>
                         </div>
-                        <p className="text-sm text-slate-400 mb-1">Total Experience</p>
+                        <p className="text-sm text-muted-foreground mb-1">Total Experience</p>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-4xl font-bold text-white max-lg:text-3xl">{stats.xp}</p>
+                            <p className="text-4xl font-bold text-foreground max-lg:text-3xl">{stats.xp}</p>
                             <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">XP</span>
                         </div>
                     </div>
@@ -144,7 +144,7 @@ export default function StatsWidget() {
                 {/* Achievements Card - Clickable */}
                 <div
                     onClick={() => setIsAchievementModalOpen(true)}
-                    className="group cursor-pointer relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 overflow-hidden"
+                    className="group cursor-pointer relative bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/20 to-transparent rounded-bl-full" />
                     <div className="relative">
@@ -152,20 +152,20 @@ export default function StatsWidget() {
                             <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
                                 <Trophy className="w-6 h-6 text-amber-400" />
                             </div>
-                            <span className="flex items-center gap-1 text-xs font-medium text-slate-400 group-hover:text-amber-400 transition-colors">
+                            <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-amber-400 transition-colors">
                                 View details <ChevronRight className="w-3 h-3" />
                             </span>
                         </div>
-                        <p className="text-sm text-slate-400 mb-1">Achievements</p>
+                        <p className="text-sm text-muted-foreground mb-1">Achievements</p>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-4xl font-bold text-white max-lg:text-3xl">{stats.achievementsCount}</p>
+                            <p className="text-4xl font-bold text-foreground max-lg:text-3xl">{stats.achievementsCount}</p>
                             <span className="text-sm text-slate-500">of {achievementsList.length}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Streak Card */}
-                <div className="group relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 hover:border-rose-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-rose-500/10 overflow-hidden">
+                <div className="group relative bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6 hover:border-rose-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-rose-500/10 overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-500/20 to-transparent rounded-bl-full" />
                     <div className="relative">
                         <div className="flex items-center justify-between mb-4">
@@ -176,8 +176,8 @@ export default function StatsWidget() {
                                 {stats.streak > 0 ? 'Active' : 'Start now'}
                             </span>
                         </div>
-                        <p className="text-sm text-slate-400 mb-1">Reading Streak</p>
-                        <p className="text-4xl font-bold text-white max-lg:text-3xl">{stats.streak}</p>
+                        <p className="text-sm text-muted-foreground mb-1">Reading Streak</p>
+                        <p className="text-4xl font-bold text-foreground max-lg:text-3xl">{stats.streak}</p>
                     </div>
                 </div>
             </div>

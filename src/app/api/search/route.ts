@@ -34,8 +34,10 @@ export async function GET(request: NextRequest) {
                 books = [cached];
                 fromCache = true;
             } else {
-                const book = await getBookByISBN(query);
+                // Use 'US' region for metadata to ensure we find the book
+                const book = await getBookByISBN(query, 'US');
                 if (book) {
+                    // Use actual user region for pricing
                     const prices = await fetchAllPrices(book.isbn, book.id, region);
                     const bookWithPrices: BookWithPrices = { ...book, prices };
                     setCachedBook(cacheKey, bookWithPrices);
@@ -46,12 +48,13 @@ export async function GET(request: NextRequest) {
             }
         } else {
             // Title/Author search
-            // For now, only caching individual books, search results are fresh to respect region changes easier
-            const rawBooks = await searchGoogleBooks(query, 12);
+            // Use 'US' for discovery to ensure we find books (Google Play availability varies by region)
+            // But we can respect the region if it's explicitly passed? No, better to search US catalog for metadata.
+            const rawBooks = await searchGoogleBooks(query, 12, 0, 'US');
 
-            // Fetch prices for each book (in parallel)
+            // Fetch prices for each book (in parallel) using the actual region
             const booksWithPrices = await Promise.all(
-                rawBooks.map(async (book) => {
+                rawBooks.map(async (book: any) => {
                     const bookCacheKey = `isbn:${book.isbn}:${region}`;
                     const cached = getCachedBook(bookCacheKey);
 
@@ -80,6 +83,10 @@ export async function GET(request: NextRequest) {
             success: true,
             data: result,
             cached: fromCache,
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+            }
         });
 
     } catch (error) {

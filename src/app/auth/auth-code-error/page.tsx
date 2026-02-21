@@ -10,7 +10,7 @@ export default function AuthCodeErrorPage() {
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
                 <Image
-                    src="/auth-bg-magical.png"
+                    src="/auth-bg.png"
                     alt="Background"
                     fill
                     className="object-cover opacity-40 blur-sm"

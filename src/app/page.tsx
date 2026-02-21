@@ -11,7 +11,7 @@ async function LandingPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-200 selection:bg-primary-500/30 selection:text-white">
+        <main className="min-h-screen selection:bg-primary-500/30 selection:text-white">
             <Navbar user={user} />
 
             <Hero />
@@ -25,7 +25,7 @@ async function LandingPage() {
 
 export default function Home() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+        <Suspense fallback={<div className="min-h-screen" />}>
             <LandingPage />
         </Suspense>
     );

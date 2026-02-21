@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, Flame } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import MobileTabBar from '@/components/MobileTabBar';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import Image from 'next/image';
@@ -67,19 +68,18 @@ export default function DashboardClientLayout({ children, initialUser, initialPr
     return (
         <SearchProvider>
             <CurrencyProvider>
-                <div className="min-h-screen bg-background relative">
-                    {/* ... content ... */}
-                    {/* Floating Background Orbs */}
+                <div className="min-h-screen relative lg:flex lg:flex-row">
+                    {/* Floating Background Orbs — subtle in both themes */}
                     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                        <div className="absolute top-20 left-10 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-float" />
-                        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-float-delayed" />
-                        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-5s' }} />
+                        <div className="absolute top-20 left-10 w-96 h-96 bg-[#7c5cfc]/5 dark:bg-[#7c5cfc]/10 rounded-full blur-3xl animate-float" />
+                        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#e8914f]/5 dark:bg-[#f0a45d]/8 rounded-full blur-3xl animate-float-delayed" />
+                        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-[#9b7aff]/3 dark:bg-[#9b7aff]/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '-5s' }} />
                     </div>
 
                     {/* Mobile Sidebar Overlay */}
                     {isMobileSidebarOpen && (
                         <div
-                            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+                            className="fixed inset-0 bg-[#0c0a14]/60 backdrop-blur-sm z-40 lg:hidden"
                             onClick={() => setIsMobileSidebarOpen(false)}
                         />
                     )}
@@ -93,29 +93,29 @@ export default function DashboardClientLayout({ children, initialUser, initialPr
                     />
 
                     {/* Main Content */}
-                    <div className={`min-h-screen flex flex-col relative z-10 transition-all duration-300 ${isDesktopCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
-                        {/* Header */}
-                        <header className="h-16 bg-white/80 dark:bg-[#0a0e27]/80 backdrop-blur-xl border-b border-slate-200 dark:border-[#1e2749] flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+                    <div className={`flex-1 min-h-screen flex flex-col relative z-10 transition-all duration-300 min-w-0`}>
+                        {/* Header — theme responsive */}
+                        <header className="h-16 bg-white/70 dark:bg-[#161222]/80 backdrop-blur-xl border-b border-[#e0d5c7]/60 dark:border-[#2d2545]/40 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 transition-colors duration-300">
                             <button
                                 onClick={() => setIsMobileSidebarOpen(true)}
-                                className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1e2749] rounded-xl transition-colors lg:hidden"
+                                className="p-2 text-[#8b7355] dark:text-[#a39484] hover:text-[#2c1810] dark:hover:text-[#f5f0eb] hover:bg-[#f3efe8] dark:hover:bg-[#241e36] rounded-xl transition-colors lg:hidden"
                             >
                                 <Menu className="w-6 h-6" />
                             </button>
 
                             <div className="ml-auto flex items-center gap-6">
                                 {/* Streak Flame */}
-                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-warning-500/10 border border-warning-500/20" title="Streak tracking coming soon!">
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/10 border border-amber-500/20 dark:border-amber-500/15" title="Reading streak">
                                     <div className="relative">
-                                        <Flame className="w-5 h-5 text-warning-400/50 relative" />
+                                        <Flame className="w-5 h-5 text-amber-500 dark:text-amber-400/60 relative" />
                                     </div>
-                                    <span className="text-sm font-bold text-warning-400/50">{streak}</span>
+                                    <span className="text-sm font-bold text-amber-600 dark:text-amber-400/60">{streak}</span>
                                 </div>
 
                                 {/* User Avatar - clickable link to profile */}
                                 <Link href="/profile" className="block">
                                     {(profile?.avatar_url || user?.user_metadata?.avatar_url) ? (
-                                        <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-primary-500/30 hover:border-primary-500/50 transition-colors shadow-lg shadow-primary-500/10 cursor-pointer">
+                                        <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-[#e0d5c7] dark:border-[#2d2545] hover:border-[#7c5cfc]/50 transition-colors shadow-lg cursor-pointer">
                                             <Image
                                                 src={profile?.avatar_url || user.user_metadata.avatar_url}
                                                 alt="User Avatar"
@@ -124,8 +124,8 @@ export default function DashboardClientLayout({ children, initialUser, initialPr
                                             />
                                         </div>
                                     ) : (
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/20 to-accent-500/20 border border-primary-500/30 hover:border-primary-500/50 transition-colors cursor-pointer flex items-center justify-center">
-                                            <span className="text-sm font-bold text-primary-400">
+                                        <div className="w-10 h-10 rounded-xl border-2 border-[#e0d5c7] dark:border-[#2d2545] hover:border-[#7c5cfc]/50 transition-colors cursor-pointer flex items-center justify-center">
+                                            <span className="text-sm font-bold text-[#7c5cfc] dark:text-[#9b7aff]">
                                                 {(profile?.full_name || user?.email)?.[0]?.toUpperCase() || 'U'}
                                             </span>
                                         </div>
@@ -134,10 +134,13 @@ export default function DashboardClientLayout({ children, initialUser, initialPr
                             </div>
                         </header>
 
-                        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8">
                             {children}
                         </main>
                     </div>
+
+                    {/* Mobile Bottom Tab Bar */}
+                    <MobileTabBar />
                 </div>
             </CurrencyProvider>
         </SearchProvider>

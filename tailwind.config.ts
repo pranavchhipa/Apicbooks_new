@@ -10,32 +10,32 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                // New Design System - Electric Indigo + Vibrant Cyan
+                // Design System — Warm Paper (Terracotta + Lavender)
                 primary: {
-                    50: '#eef2ff',
-                    100: '#e0e7ff',
-                    200: '#c7d2fe',
-                    300: '#a5b4fc',
-                    400: '#818cf8',
-                    500: '#6366f1', // Electric Indigo - Main
-                    600: '#4f46e5',
-                    700: '#4338ca',
-                    800: '#3730a3',
-                    900: '#312e81',
-                    950: '#1e1b4b',
+                    50: '#fdf2f0',
+                    100: '#fce5e1',
+                    200: '#f8cfc9',
+                    300: '#f2aa9e',
+                    400: '#ec8670',
+                    500: '#e07a5f', // Terracotta - Main
+                    600: '#c95d43',
+                    700: '#a74631',
+                    800: '#8a3c2d',
+                    900: '#713426',
+                    950: '#3d1810',
                 },
                 accent: {
-                    50: '#ecfeff',
-                    100: '#cffafe',
-                    200: '#a5f3fc',
-                    300: '#67e8f9',
-                    400: '#22d3ee',
-                    500: '#06b6d4', // Vibrant Cyan - Main
-                    600: '#0891b2',
-                    700: '#0e7490',
-                    800: '#155e75',
-                    900: '#164e63',
-                    950: '#083344',
+                    50: '#f5f4f8',
+                    100: '#ebe9f1',
+                    200: '#d8d3e2',
+                    300: '#b9b2ce',
+                    400: '#978eb6',
+                    500: '#8174a0', // Warm Lavender - Main
+                    600: '#685c86',
+                    700: '#54496d',
+                    800: '#463d59',
+                    900: '#3b3449',
+                    950: '#231f2b',
                 },
 
                 success: {
@@ -114,11 +114,11 @@ const config: Config = {
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-                'hero-gradient': 'linear-gradient(135deg, #0a0e27 0%, #141b3d 50%, #1e2749 100%)',
-                'mesh-gradient': 'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.1) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
+                'hero-gradient': 'linear-gradient(135deg, #09090b 0%, #18181b 100%)',
+                'mesh-gradient': 'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.1) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%)',
                 'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-                'gradient-mixed': 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                'gradient-accent': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                'gradient-mixed': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
             },
             animation: {
                 'fade-in': 'fadeIn 0.5s ease-out',
@@ -175,8 +175,8 @@ const config: Config = {
                     '50%': { transform: 'translateY(-10px)' },
                 },
                 glow: {
-                    '0%, 100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' },
-                    '50%': { boxShadow: '0 0 40px rgba(99, 102, 241, 0.5)' },
+                    '0%, 100%': { boxShadow: '0 0 20px rgba(124, 92, 252, 0.3)' },
+                    '50%': { boxShadow: '0 0 40px rgba(124, 92, 252, 0.5)' },
                 },
                 gradientShift: {
                     '0%': { backgroundPosition: '0% 50%' },
@@ -185,10 +185,10 @@ const config: Config = {
                 },
             },
             boxShadow: {
-                'glass': '0 8px 32px 0 rgba(10, 14, 39, 0.37)',
-                'glow': '0 0 20px rgba(99, 102, 241, 0.3)',
-                'glow-lg': '0 0 40px rgba(99, 102, 241, 0.4)',
-                'glow-accent': '0 0 20px rgba(6, 182, 212, 0.3)',
+                'glass': '0 8px 32px 0 rgba(12, 10, 20, 0.37)',
+                'glow': '0 0 20px rgba(124, 92, 252, 0.3)',
+                'glow-lg': '0 0 40px rgba(124, 92, 252, 0.4)',
+                'glow-accent': '0 0 20px rgba(232, 145, 79, 0.3)',
                 'glow-success': '0 0 20px rgba(16, 185, 129, 0.3)',
                 'inner-glow': 'inset 0 0 20px rgba(255, 255, 255, 0.05)',
             },

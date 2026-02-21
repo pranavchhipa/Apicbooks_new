@@ -11,7 +11,7 @@ const features = [
         description: "Stop scrolling and start reading. Our AI librarian 'Anika' analyzes your mood, favorite tropes, and recent reads to suggest the perfect book in seconds.",
         icon: Sparkles,
         image: "/landing-discover.png",
-        color: "text-purple-400",
+        color: "text-[#9b7aff]",
         stats: [
             { label: "AI Suggestions", value: "Instant" },
             { label: "Accuracy", value: "98%" },
@@ -33,7 +33,7 @@ const features = [
 
 export default function ValueProps() {
     return (
-        <section id="community" className="py-32 bg-slate-950 overflow-hidden relative">
+        <section id="community" className="py-32 bg-[#f3efe8] dark:bg-[#0c0a14] overflow-hidden relative">
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-32">
                 {features.map((feature, index) => (
@@ -47,22 +47,22 @@ export default function ValueProps() {
                             transition={{ duration: 0.6 }}
                             className="flex-1"
                         >
-                            <div className={`p-3 rounded-2xl bg-slate-800/50 w-fit mb-6 border border-slate-700/50 ${feature.color}`}>
+                            <div className={`p-3 rounded-2xl bg-white/60 dark:bg-[#241e36]/50 w-fit mb-6 border border-[#e0d5c7] dark:border-[#2d2545]/50 ${feature.color}`}>
                                 <feature.icon className="w-8 h-8" />
                             </div>
-                            <h3 className="text-xl font-medium text-slate-400 mb-2 uppercase tracking-wide">{feature.title}</h3>
-                            <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6 leading-tight">
+                            <h3 className="text-xl font-medium text-[#8b7355] dark:text-[#a39484] mb-2 uppercase tracking-wide">{feature.title}</h3>
+                            <h2 className="text-3xl md:text-5xl font-display font-bold text-[#2c1810] dark:text-[#f5f0eb] mb-6 leading-tight">
                                 {feature.heading}
                             </h2>
-                            <p className="text-lg text-slate-400 leading-relaxed mb-8">
+                            <p className="text-lg text-[#8b7355] dark:text-[#a39484] leading-relaxed mb-8">
                                 {feature.description}
                             </p>
 
-                            <div className="flex gap-8 border-t border-slate-800 pt-8">
+                            <div className="flex gap-8 border-t border-[#e0d5c7] dark:border-[#2d2545] pt-8">
                                 {feature.stats.map((stat) => (
                                     <div key={stat.label}>
-                                        <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                                        <div className="text-sm text-slate-500 font-medium">{stat.label}</div>
+                                        <div className="text-2xl font-bold text-[#2c1810] dark:text-[#f5f0eb] mb-1">{stat.value}</div>
+                                        <div className="text-sm text-[#a39484] dark:text-[#8b7355] font-medium">{stat.label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -76,8 +76,8 @@ export default function ValueProps() {
                             transition={{ duration: 0.8 }}
                             className="flex-1 w-full"
                         >
-                            <div className="relative rounded-2xl bg-slate-900 border border-slate-700/50 shadow-2xl shadow-primary-500/10 overflow-hidden group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-primary-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+                            <div className="relative rounded-2xl bg-white dark:bg-[#1a1528] border border-[#e0d5c7] dark:border-[#2d2545]/50 shadow-2xl shadow-[#7c5cfc]/5 dark:shadow-[#9b7aff]/10 overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-[#7c5cfc]/5 dark:from-[#9b7aff]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
 
                                 <Image
                                     src={feature.image}

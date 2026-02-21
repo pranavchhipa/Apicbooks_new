@@ -8,10 +8,17 @@ import { ArrowLeft, BookOpen, Calendar, FileText, Heart, Tag, Users, Share2, Twi
 import PriceTable from '@/components/PriceTable';
 import StarRating from '@/components/StarRating';
 import CommunityReviews from '@/components/CommunityReviews';
+import AuthorBioCard from '@/components/books/AuthorBioCard';
+import GoogleBookPreview from '@/components/books/GoogleBookPreview';
+import SeriesBadge from '@/components/SeriesBadge';
+import SeriesEditModal from '@/components/SeriesEditModal';
+import RequestSeriesModal from '@/components/books/RequestSeriesModal';
+import { Pencil, FileQuestion } from 'lucide-react';
 import type { BookWithPrices } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { addToLibrary, getBookStatus, updateLibraryProgress, ReadingStatus } from '@/lib/api/library';
 import { toast } from 'sonner';
+import { ADMIN_EMAILS } from '@/lib/constants';
 
 export default function BookDetailPage() {
     const params = useParams();
@@ -38,6 +45,12 @@ export default function BookDetailPage() {
     const [isReviewPublic, setIsReviewPublic] = useState(true);
     const [userId, setUserId] = useState<string | undefined>(undefined);
     const [internalBookId, setInternalBookId] = useState<string | null>(null);
+    const [googleBookId, setGoogleBookId] = useState<string | null>(null);
+    const [isSeriesModalOpen, setIsSeriesModalOpen] = useState(false);
+    const [isRequestSeriesModalOpen, setIsRequestSeriesModalOpen] = useState(false);
+    const [userSeriesName, setUserSeriesName] = useState<string | null>(null);
+    const [userSeriesOrder, setUserSeriesOrder] = useState<number | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
 
     const supabase = createClient();
 
@@ -64,6 +77,7 @@ export default function BookDetailPage() {
                         console.log('[BookDetail] ID is UUID, using directly');
                         targetUuid = bookId;
                     } else {
+                        setGoogleBookId(bookId); // Non-UUID = Google Books ID
                         const { data: internalBook, error: internalErr } = await supabase
                             .from('books')
                             .select('id')
@@ -81,13 +95,38 @@ export default function BookDetailPage() {
                     if (targetUuid) {
                         setInternalBookId(targetUuid);
 
-                        // 3. Fetch User Status (if logged in)
+                        // Resolve Google Book ID from DB if we came in with a UUID
+                        if (isUuid && !googleBookId) {
+                            const { data: bookRow } = await supabase
+                                .from('books')
+                                .select('google_id')
+                                .eq('id', targetUuid)
+                                .single();
+                            if (bookRow?.google_id) {
+                                setGoogleBookId(bookRow.google_id);
+                            }
+                        }
+
+                        // 3. Fetch Global Metadata
+                        const { data: globalMeta } = await supabase
+                            .from('global_book_metadata')
+                            .select('series_name, series_order')
+                            .eq('book_id', targetUuid)
+                            .single();
+
+                        if (globalMeta) {
+                            console.log('[BookDetail] using global metadata:', globalMeta);
+                            setUserSeriesName(globalMeta.series_name);
+                            setUserSeriesOrder(globalMeta.series_order);
+                        }
+
+                        // 4. Fetch User Status (if logged in)
                         const { data: { user } } = await supabase.auth.getUser();
                         if (user) {
                             console.log('[BookDetail] Fetching user status for:', user.id);
                             const { data: entry, error: entryErr } = await supabase
                                 .from('user_library')
-                                .select('status, rating, review, current_page, is_review_public')
+                                .select('status, rating, review, current_page, is_review_public, series_name, series_order')
                                 .eq('user_id', user.id)
                                 .eq('book_id', targetUuid) // Use UUID (targetUuid)
                                 .single();
@@ -100,8 +139,14 @@ export default function BookDetailPage() {
                                 setReviewText(entry.review || '');
                                 setCurrentPage(entry.current_page || 0);
                                 setIsReviewPublic(entry.is_review_public !== false);
+                                // Prefer global metadata if available, else fall back to legacy user entry
+                                if (!globalMeta) {
+                                    setUserSeriesName(entry.series_name);
+                                    setUserSeriesOrder(entry.series_order);
+                                }
                             }
                             setUserId(user.id);
+                            setUserEmail(user.email || null);
                         }
                     }
                 } else {
@@ -131,8 +176,19 @@ export default function BookDetailPage() {
                 return;
             }
 
-            // addToLibrary returns the library item, which contains the internal book_id
-            const item = await addToLibrary(user.id, bookId, newStatus);
+            // Ensure book exists in DB before adding
+            let targetId = bookId;
+            const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(bookId);
+
+            if (!isUuid) {
+                const { ensureBookExists } = await import('@/lib/api/library');
+                const resolvedId = await ensureBookExists(bookId);
+                if (resolvedId) targetId = resolvedId;
+            }
+
+            // Using the resolved ID (or original if already UUID)
+            const item = await addToLibrary(user.id, targetId, newStatus);
+
             if (item && item.book_id) {
                 setInternalBookId(item.book_id);
             }
@@ -387,40 +443,33 @@ export default function BookDetailPage() {
                                 </a>
                             )}
 
-                            {/* Shelving Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowShelfMenu(!showShelfMenu)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all duration-300 border ${currentShelfOption
-                                        ? 'bg-[#1e2749] border-primary-500 text-white'
-                                        : 'btn-secondary text-slate-300'
-                                        }`}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        {isShelving ? <Loader2 className="w-5 h-5 animate-spin" /> : <BookOpen className="w-5 h-5" />}
-                                        {currentShelfOption ? currentShelfOption.label : 'Add to My Books'}
-                                    </span>
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${showShelfMenu ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                {showShelfMenu && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-[#0a0e27] border border-[#1e2749] rounded-xl shadow-2xl z-50 animate-fade-in-up">
-                                        {SHELF_OPTIONS.map((option) => (
-                                            <button
-                                                key={option.value}
-                                                onClick={() => handleShelfUpdate(option.value)}
-                                                className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#1e2749] transition-colors text-left group ${shelfStatus === option.value ? 'bg-primary-500/10' : ''
-                                                    }`}
-                                            >
-                                                <div className={`w-2 h-2 rounded-full ${option.color.replace('text-', 'bg-')}`} />
-                                                <span className={`flex-1 font-medium ${shelfStatus === option.value ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
-                                                    {option.label}
-                                                </span>
-                                                {shelfStatus === option.value && <CheckCircle className="w-4 h-4 text-primary-400" />}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                            <div className="relative z-20">
+                                <div className="grid grid-cols-3 gap-2">
+                                    {SHELF_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => handleShelfUpdate(option.value)}
+                                            className={`
+                                                flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all duration-200
+                                                ${shelfStatus === option.value
+                                                    ? 'bg-primary-500 border-primary-500 text-white shadow-lg shadow-primary-500/20'
+                                                    : 'bg-[#1e2749] border-transparent text-slate-400 hover:bg-[#28325a] hover:text-slate-200'
+                                                }
+                                            `}
+                                        >
+                                            {isShelving && shelfStatus === option.value ? (
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    {option.value === 'wishlist' && <Heart className={`w-5 h-5 ${shelfStatus === option.value ? 'fill-current' : ''}`} />}
+                                                    {option.value === 'reading' && <BookOpen className="w-5 h-5" />}
+                                                    {option.value === 'completed' && <CheckCircle className="w-5 h-5" />}
+                                                </>
+                                            )}
+                                            <span className="text-[10px] font-medium uppercase tracking-wider">{option.label.split(' ')[0]}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                         </div>
@@ -506,12 +555,41 @@ export default function BookDetailPage() {
 
                 {/* Book Info */}
                 <div className="lg:col-span-2 space-y-6">
+                    {/* Series Badge or Request Button */}
+                    {/* Series Badge or Request Button */}
+                    <div className="mb-[-1rem] flex items-center gap-2">
+                        {(userSeriesName || book.seriesName) ? (
+                            <>
+                                <SeriesBadge seriesName={userSeriesName || book.seriesName} seriesOrder={userSeriesOrder || book.seriesOrder} />
+                                {/* RBAC: Only show edit pencil if user is Admin */}
+                                {(internalBookId && userId && userEmail && ADMIN_EMAILS.includes(userEmail)) && (
+                                    <button
+                                        onClick={() => setIsSeriesModalOpen(true)}
+                                        className="p-1 text-slate-400 hover:text-violet-500 transition-colors rounded-full hover:bg-violet-500/10"
+                                        title="Edit Series Info"
+                                    >
+                                        <Pencil className="w-3 h-3" />
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            // Only show Request button if NO series data exists
+                            <button
+                                onClick={() => setIsRequestSeriesModalOpen(true)}
+                                className="text-xs text-slate-500 hover:text-violet-400 transition-colors flex items-center gap-1.5 px-2 py-1 rounded-lg border border-transparent hover:border-violet-500/20 hover:bg-violet-500/5"
+                            >
+                                <FileQuestion className="w-3 h-3" />
+                                Is this part of a series? Let us know.
+                            </button>
+                        )}
+                    </div>
+
                     {/* Title & Author */}
                     <div>
-                        <h1 className="text-3xl lg:text-4xl font-display font-bold text-white mb-2">
+                        <h1 className="text-3xl lg:text-4xl font-display font-bold text-slate-900 dark:text-white mb-2">
                             {book.title}
                         </h1>
-                        <p className="text-xl text-slate-400">
+                        <p className="text-xl text-slate-600 dark:text-slate-400">
                             by {book.authors?.join(', ') || 'Unknown Author'}
                         </p>
                     </div>
@@ -565,6 +643,16 @@ export default function BookDetailPage() {
                                 dangerouslySetInnerHTML={{ __html: book.description }}
                             />
                         </div>
+                    )}
+
+                    {/* Author Bio from Wikipedia */}
+                    {book.authors && book.authors.length > 0 && book.authors[0] !== 'Unknown Author' && (
+                        <AuthorBioCard authorName={book.authors[0]} />
+                    )}
+
+                    {/* Google Books Preview */}
+                    {googleBookId && (
+                        <GoogleBookPreview googleBookId={googleBookId} bookTitle={book.title} />
                     )}
 
                     {/* Community Reviews - Show first for social proof */}
@@ -661,6 +749,26 @@ export default function BookDetailPage() {
 
                 </div>
             </div>
+
+            {internalBookId && (
+                <SeriesEditModal
+                    isOpen={isSeriesModalOpen}
+                    onClose={() => setIsSeriesModalOpen(false)}
+                    bookId={internalBookId!}
+                    currentSeriesName={userSeriesName || book?.seriesName}
+                    currentSeriesOrder={userSeriesOrder || book?.seriesOrder}
+                    onSave={() => window.location.reload()}
+                />
+            )}
+
+            {internalBookId && (
+                <RequestSeriesModal
+                    isOpen={isRequestSeriesModalOpen}
+                    onClose={() => setIsRequestSeriesModalOpen(false)}
+                    bookId={internalBookId!}
+                    bookTitle={book.title}
+                />
+            )}
         </div>
     );
 }

@@ -133,7 +133,7 @@ export default function PriceTable({ prices, className = '' }: PriceTableProps) 
 
     if (prices.length === 0) {
         return (
-            <div className={`bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl text-center py-8 px-6 ${className}`}>
+            <div className={`bg-card backdrop-blur-xl border border-card-border rounded-2xl text-center py-8 px-6 ${className}`}>
                 <p className="text-slate-400">No price data available</p>
             </div>
         );
@@ -284,8 +284,8 @@ export default function PriceTable({ prices, className = '' }: PriceTableProps) 
 
             {/* Main Price Table */}
             {pricesWithData.length > 0 && (
-                <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#1e2749] bg-[#0d1229]/50">
+                <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-card-border bg-[#0d1229]/50">
                         <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
                             <ShoppingBag className="w-4 h-4" /> Price Comparison <span className="text-xs text-slate-500 ml-1">(in {symbol})</span>
                         </h3>
@@ -293,7 +293,7 @@ export default function PriceTable({ prices, className = '' }: PriceTableProps) 
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-[#1e2749]">
+                                <tr className="border-b border-card-border">
                                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Retailer</th>
                                     <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">New</th>
                                     <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Used</th>
@@ -353,8 +353,8 @@ export default function PriceTable({ prices, className = '' }: PriceTableProps) 
 
             {/* Quick Links - Sites without prices */}
             {linksOnly.length > 0 && (
-                <div className="bg-[#141b3d]/40 backdrop-blur-xl border border-[#1e2749]/50 rounded-2xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#1e2749]/50 bg-[#0d1229]/30">
+                <div className="bg-[#141b3d]/40 backdrop-blur-xl border border-card-border/50 rounded-2xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-card-border/50 bg-[#0d1229]/30">
                         <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2">
                             <Store className="w-4 h-4" /> More Places to Check
                         </h3>
@@ -368,7 +368,7 @@ export default function PriceTable({ prices, className = '' }: PriceTableProps) 
                                     href={price.url || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#1a2341]/50 hover:bg-[#1e2749] border border-transparent hover:border-[#2a3655] transition-all group"
+                                    className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#1a2341]/50 hover:bg-elevated border border-transparent hover:border-[#2a3655] transition-all group"
                                 >
                                     <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${config.bgColor} ${config.textColor} font-bold text-xs shadow-sm`}>
                                         {config.initial}
@@ -399,11 +399,11 @@ export function PriceTableSkeleton() {
     return (
         <div className="space-y-4 animate-pulse">
             <div className="grid grid-cols-2 gap-4">
-                <div className="h-28 rounded-2xl bg-[#1e2749]" />
-                <div className="h-28 rounded-2xl bg-[#1e2749]" />
+                <div className="h-28 rounded-2xl bg-elevated" />
+                <div className="h-28 rounded-2xl bg-elevated" />
             </div>
-            <div className="h-48 rounded-2xl bg-[#1e2749]" />
-            <div className="h-32 rounded-2xl bg-[#1e2749]" />
+            <div className="h-48 rounded-2xl bg-elevated" />
+            <div className="h-32 rounded-2xl bg-elevated" />
         </div>
     );
 }

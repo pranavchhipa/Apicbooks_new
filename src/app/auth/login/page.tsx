@@ -4,14 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { BookOpen, Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/Logo';
-import Image from 'next/image';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // Add state
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -55,46 +54,34 @@ export default function LoginPage() {
         }
     };
 
-
-
     return (
-        <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#0f172a] overflow-y-auto">
+        <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#0c0a14] overflow-y-auto">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden">
-                <Image
-                    src="/auth-bg-magical.png"
-                    alt="Background"
-                    fill
-                    className="object-cover opacity-40 blur-sm"
-                    priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/80 to-[#0f172a]/40" />
+                {/* Mesh gradient background */}
+                <div className="absolute inset-0" style={{
+                    background: 'radial-gradient(ellipse at 20% 30%, rgba(124, 92, 252, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(232, 145, 79, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(155, 122, 255, 0.06) 0%, transparent 60%)',
+                }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a14] via-[#0c0a14]/60 to-[#0c0a14]/40" />
             </div>
 
             <div className="w-full max-w-md relative z-10">
                 {/* Back Link */}
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4 text-sm font-medium group"
+                    className="inline-flex items-center gap-2 text-[#a39484] hover:text-[#f5f0eb] transition-colors mb-6 text-sm font-medium group"
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     Back to Home
                 </Link>
 
-                <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
-                    <div className="text-center mb-6">
-                        <Link href="/" className="inline-block mb-4">
-                            <Image
-                                src="/logo-full.png"
-                                alt="ApicBooks"
-                                width={300}
-                                height={80}
-                                className="h-16 w-auto"
-                                priority
-                            />
+                <div className="bg-[#1a1528]/60 backdrop-blur-xl border border-[#2d2545]/50 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-[#7c5cfc]/5">
+                    <div className="text-center mb-8">
+                        <Link href="/" className="inline-flex justify-center mb-5">
+                            <Logo className="w-56" />
                         </Link>
-                        <h2 className="text-2xl font-bold text-white mb-1">Welcome back</h2>
-                        <p className="text-slate-400 text-sm">Sign in to your account to continue</p>
+                        <h2 className="text-2xl font-bold text-[#f5f0eb] mb-1">Welcome back</h2>
+                        <p className="text-[#a39484] text-sm">Sign in to your account to continue</p>
                     </div>
 
                     {error && (
@@ -108,7 +95,7 @@ export default function LoginPage() {
                         <button
                             onClick={handleGoogleLogin}
                             type="button"
-                            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white text-slate-900 rounded-xl font-semibold hover:bg-slate-100 transition-colors text-sm"
+                            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white text-[#2c1810] rounded-xl font-semibold hover:bg-[#f5f0eb] transition-colors text-sm"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
@@ -133,18 +120,18 @@ export default function LoginPage() {
 
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-slate-700/50"></div>
+                                <div className="w-full border-t border-[#2d2545]/60"></div>
                             </div>
                             <div className="relative flex justify-center text-xs">
-                                <span className="px-4 bg-[#131c31] text-slate-500 rounded-full">Or continue with email</span>
+                                <span className="px-4 bg-[#1a1528] text-[#a39484] rounded-full">Or continue with email</span>
                             </div>
                         </div>
 
                         <form onSubmit={handleEmailLogin} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-slate-300 mb-1.5">Email address</label>
+                                <label className="block text-xs font-medium text-[#a39484] mb-1.5">Email address</label>
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#a39484]/60">
                                         <Mail className="h-4 w-4" />
                                     </div>
                                     <input
@@ -152,20 +139,20 @@ export default function LoginPage() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full pl-9 pr-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-slate-500 transition-all outline-none text-sm"
+                                        className="w-full pl-9 pr-4 py-2.5 bg-[#241e36]/50 border border-[#2d2545]/60 rounded-xl focus:ring-2 focus:ring-[#7c5cfc]/50 focus:border-[#7c5cfc]/50 text-[#f5f0eb] placeholder-[#a39484]/50 transition-all outline-none text-sm"
                                         placeholder="name@company.com"
                                     />
                                 </div>
                             </div>
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <label className="block text-xs font-medium text-slate-300">Password</label>
-                                    <Link href="/auth/reset-password" className="text-xs text-primary-400 hover:text-primary-300 transition-colors">
+                                    <label className="block text-xs font-medium text-[#a39484]">Password</label>
+                                    <Link href="/auth/reset-password" className="text-xs text-[#9b7aff] hover:text-[#7c5cfc] transition-colors">
                                         Forgot password?
                                     </Link>
                                 </div>
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#a39484]/60">
                                         <Lock className="h-4 w-4" />
                                     </div>
                                     <input
@@ -173,14 +160,14 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-9 pr-12 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-slate-500 transition-all outline-none text-sm"
+                                        className="w-full pl-9 pr-12 py-2.5 bg-[#241e36]/50 border border-[#2d2545]/60 rounded-xl focus:ring-2 focus:ring-[#7c5cfc]/50 focus:border-[#7c5cfc]/50 text-[#f5f0eb] placeholder-[#a39484]/50 transition-all outline-none text-sm"
                                         placeholder="••••••••"
                                     />
                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+                                            className="text-[#a39484]/60 hover:text-[#a39484] transition-colors focus:outline-none"
                                         >
                                             {showPassword ? (
                                                 <EyeOff className="h-4 w-4" />
@@ -195,7 +182,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+                                className="w-full bg-gradient-to-r from-[#7c5cfc] to-[#9b7aff] hover:from-[#6a45e8] hover:to-[#7c5cfc] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-[#7c5cfc]/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] text-sm"
                             >
                                 {isLoading ? (
                                     <>
@@ -209,9 +196,9 @@ export default function LoginPage() {
                         </form>
                     </div>
 
-                    <p className="text-center text-slate-400 text-xs mt-6">
+                    <p className="text-center text-[#a39484] text-xs mt-6">
                         Don&apos;t have an account?{' '}
-                        <Link href="/auth/signup" className="text-white hover:text-primary-400 font-semibold transition-colors">
+                        <Link href="/auth/signup" className="text-[#f5f0eb] hover:text-[#9b7aff] font-semibold transition-colors">
                             Sign up
                         </Link>
                     </p>
@@ -220,4 +207,3 @@ export default function LoginPage() {
         </div>
     );
 }
-

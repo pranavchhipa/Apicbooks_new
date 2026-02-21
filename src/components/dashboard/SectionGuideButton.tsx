@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Info, X, Zap, Book, Users, Search, Lightbulb, Star, Shield, Target } from 'lucide-react';
+import { Info, X, Zap, Book, Users, Search, Lightbulb, Star, Shield, Target, BookMarked, FileText, MessageSquare } from 'lucide-react';
 
-type SectionType = 'pulse' | 'my-books' | 'community' | 'discover';
+type SectionType = 'pulse' | 'my-books' | 'community' | 'discover' | 'journal';
 
 interface SectionContent {
     title: string;
@@ -110,6 +110,29 @@ const SECTION_CONTENT: Record<SectionType, SectionContent> = {
                 icon: Book
             }
         ]
+    },
+    journal: {
+        title: "Journal",
+        description: "Your reading thoughts, notes, and reviews in one place.",
+        icon: BookMarked,
+        color: "text-violet-400",
+        features: [
+            {
+                title: "Session Notes",
+                desc: "Notes from your reading sessions are automatically collected here with page references.",
+                icon: FileText
+            },
+            {
+                title: "Reviews & Ratings",
+                desc: "All your book reviews and star ratings organized for easy browsing.",
+                icon: Star
+            },
+            {
+                title: "Search & Filter",
+                desc: "Quickly find specific notes or reviews by searching across all your entries.",
+                icon: Search
+            }
+        ]
     }
 };
 
@@ -125,7 +148,7 @@ export default function SectionGuideButton({ section }: { section: SectionType }
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="p-2 rounded-xl bg-[#1e2749]/50 hover:bg-[#1e2749] border border-[#1e2749] text-slate-400 hover:text-white transition-all duration-300 group ml-2"
+                className="p-2 rounded-xl bg-elevated/50 hover:bg-elevated border border-card-border text-muted-foreground hover:text-foreground transition-all duration-300 group ml-2"
                 title={`${content.title} Guide`}
             >
                 <Info className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -137,27 +160,27 @@ export default function SectionGuideButton({ section }: { section: SectionType }
                     onClick={() => setIsOpen(false)}
                 >
                     <div
-                        className="w-full max-w-lg bg-[#0a0e27] border border-[#1e2749] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative animate-scale-in"
+                        className="w-full max-w-lg bg-secondary dark:bg-[#0c0a14] border border-card-border rounded-2xl shadow-2xl flex flex-col overflow-hidden relative animate-scale-in"
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="relative p-6 bg-gradient-to-br from-[#141b3d] to-[#0a0e27] border-b border-[#1e2749]">
+                        <div className="relative p-6 bg-gradient-to-br from-[#141b3d] to-[#0a0e27] border-b border-card-border">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full pointer-events-none" />
 
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors z-50"
+                                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-muted-foreground hover:text-foreground transition-colors z-50"
                             >
                                 <X className="w-5 h-5" />
                             </button>
 
                             <div className="flex items-center gap-4 relative z-10">
-                                <div className={`p-3 rounded-xl bg-[#1e2749] border border-[#2a3459] shadow-lg ${content.color}`}>
+                                <div className={`p-3 rounded-xl bg-elevated border border-[#2a3459] shadow-lg ${content.color}`}>
                                     <content.icon className="w-8 h-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white">{content.title}</h2>
-                                    <p className="text-slate-400 text-sm mt-1">{content.description}</p>
+                                    <h2 className="text-2xl font-bold text-foreground">{content.title}</h2>
+                                    <p className="text-muted-foreground text-sm mt-1">{content.description}</p>
                                 </div>
                             </div>
                         </div>
@@ -166,14 +189,14 @@ export default function SectionGuideButton({ section }: { section: SectionType }
                         <div className="p-6 space-y-6">
                             {content.features.map((feature, i) => (
                                 <div key={i} className="flex gap-4 group">
-                                    <div className={`mt-1 p-2 rounded-lg bg-[#1e2749]/50 group-hover:bg-[#1e2749] transition-colors h-fit ${content.color}`}>
+                                    <div className={`mt-1 p-2 rounded-lg bg-elevated/50 group-hover:bg-elevated transition-colors h-fit ${content.color}`}>
                                         <feature.icon className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-white text-base group-hover:text-primary-300 transition-colors">
+                                        <h3 className="font-semibold text-foreground text-base group-hover:text-primary-300 transition-colors">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-sm text-slate-400 leading-relaxed mt-1">
+                                        <p className="text-sm text-muted-foreground leading-relaxed mt-1">
                                             {feature.desc}
                                         </p>
                                     </div>
@@ -182,10 +205,10 @@ export default function SectionGuideButton({ section }: { section: SectionType }
                         </div>
 
                         {/* Footer */}
-                        <div className="p-4 border-t border-[#1e2749] bg-[#0d1233] flex justify-end">
+                        <div className="p-4 border-t border-card-border bg-[#0d1233] flex justify-end">
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="px-6 py-2 rounded-xl bg-[#1e2749] hover:bg-[#2a3459] text-white text-sm font-medium transition-colors"
+                                className="px-6 py-2 rounded-xl bg-elevated hover:bg-[#2a3459] text-foreground text-sm font-medium transition-colors"
                             >
                                 Got it
                             </button>

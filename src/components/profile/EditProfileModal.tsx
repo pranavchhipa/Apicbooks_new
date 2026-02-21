@@ -77,15 +77,15 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-2xl bg-[#0a0e27] border border-[#1e2749] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative">
+            <div className="w-full max-w-2xl bg-background dark:bg-[#0c0a14] border border-card-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-[#1e2749] bg-[#141b3d]/50 shrink-0">
+                <div className="flex items-center justify-between p-6 border-b border-card-border bg-[#141b3d]/50 shrink-0">
                     <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                         <User className="w-5 h-5 text-primary-400" />
                         Edit Profile
                     </h2>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#1e2749] text-slate-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-elevated text-slate-400 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -94,7 +94,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
 
                     {/* Avatar */}
                     <div className="flex flex-col items-center gap-4">
-                        <div className="relative w-28 h-28 rounded-full bg-slate-800 border-4 border-[#1e2749] overflow-hidden group">
+                        <div className="relative w-28 h-28 rounded-full bg-slate-800 border-4 border-card-border overflow-hidden group">
                             {previewUrl || profile?.avatar_url ? (
                                 <Image
                                     src={previewUrl || profile?.avatar_url || ''}
@@ -123,7 +123,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                 type="text"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
-                                className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                                className="w-full bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
                                 placeholder="Your Name"
                             />
                         </div>
@@ -134,7 +134,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 rows={3}
-                                className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors resize-none"
+                                className="w-full bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors resize-none"
                                 placeholder="Tell us about yourself..."
                             />
                         </div>
@@ -146,7 +146,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                     type="text"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
-                                    className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                                    className="w-full bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
                                     placeholder="City, Country"
                                 />
                             </div>
@@ -156,14 +156,14 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                     type="url"
                                     value={website}
                                     onChange={(e) => setWebsite(e.target.value)}
-                                    className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
+                                    className="w-full bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors"
                                     placeholder="https://"
                                 />
                             </div>
                         </div>
 
                         {/* Reading Preferences */}
-                        <div className="pt-4 border-t border-[#1e2749]">
+                        <div className="pt-4 border-t border-card-border">
                             <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                                 <Target className="w-4 h-4 text-accent-400" />
                                 Reading Preferences
@@ -178,7 +178,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                             min="1"
                                             value={readingGoal}
                                             onChange={(e) => setReadingGoal(parseInt(e.target.value) || 0)}
-                                            className="w-24 bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors text-center font-bold"
+                                            className="w-24 bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors text-center font-bold"
                                         />
                                         <span className="text-sm text-slate-500">books per year</span>
                                     </div>
@@ -200,7 +200,7 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                                                 }}
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${favoriteGenres.includes(genre)
                                                     ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
-                                                    : 'bg-[#141b3d] text-slate-400 border-[#1e2749] hover:border-slate-600'
+                                                    : 'bg-[#141b3d] text-slate-400 border-card-border hover:border-slate-600'
                                                     }`}
                                             >
                                                 {genre}
@@ -217,10 +217,10 @@ export default function EditProfileModal({ isOpen, onClose, user, profile, onPro
                 </form>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-[#1e2749] bg-[#141b3d]/50 flex justify-end gap-3">
+                <div className="p-6 border-t border-card-border bg-[#141b3d]/50 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 rounded-xl text-slate-300 hover:bg-[#1e2749] transition-colors font-medium"
+                        className="px-6 py-2.5 rounded-xl text-slate-300 hover:bg-elevated transition-colors font-medium"
                     >
                         Cancel
                     </button>

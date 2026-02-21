@@ -18,91 +18,93 @@ export async function POST(request: NextRequest) {
 
         console.log('Processing mood search:', mood, 'Region:', region);
 
-        // Get AI recommendations
-        let analysis = await getMoodRecommendations(mood);
-        console.log('Got', analysis.recommendations.length, 'recommendations from AI');
+        // Parallel Execution: Direct Search + AI Recommendations
+        const [directResults, recommendations] = await Promise.all([
+            searchGoogleBooks(mood, 4), // Fetch 4 direct matches
+            getMoodRecommendations(mood) // Fetch ~10 AI recommendations
+        ]);
 
-        let books: BookWithPrices[] = [];
+        console.log(`Got ${directResults.length} direct matches and ${recommendations.length} AI recommendations`);
 
-        // Check if we got the generic fallback (detect by explanation)
-        // This happens if the API fails AND the mock keyword matcher found nothing
-        // We also check against the known default book list for safety
-        // Check if we got the generic fallback (detect by explanation)
-        // This happens if the API fails AND the mock keyword matcher found nothing
-        // We also check against the known default book list for safety
-        const firstBookTitle = analysis.recommendations[0]?.title;
-        // const isDefaultList = firstBookTitle && DEFAULT_BOOKS.includes(firstBookTitle);
-        // const isGenericExplanation = analysis.explanation.includes("curated a diverse selection of highly acclaimed books");
+        // Hydration Logic: Convert AI recommendations to Real Books
+        // Hydration Logic: Convert AI recommendations to Real Books
+        // optimization: process in batches to avoid rate limits
+        const processRecommendation = async (rec: any) => {
+            try {
+                // Parallel Strict Search and Fallback Search
+                const strictQuery = `intitle:${rec.title} inauthor:${rec.author}`;
+                const fallbackQuery = `${rec.title} ${rec.author}`;
 
-        // We trigger fallback if it looks generic, unless the user ASKED for something that matches our defaults (like sci-fi)
-        // But since our defaults are "Project Hail Mary", if user asked for "sci-fi", these are actually good.
-        // So we mainly want to catch when user asks for "underwater basket weaving" and gets Project Hail Mary.
-        // const isGenericFallback = isGenericExplanation || (isDefaultList && !mood.toLowerCase().includes('sci-fi'));
+                const [strictResults, fallbackResults] = await Promise.all([
+                    searchGoogleBooks(strictQuery, 3),
+                    searchGoogleBooks(fallbackQuery, 3)
+                ]);
 
-        // DIRECT FALLBACK REMOVED: Searching Google Books for the mood string directly (e.g. "romantic")
-        // returns random books that happen to have that word in the title/metadata, which leads to poor user experience.
-        // We will rely on the AI (or mock data) to provide good specific titles.
+                let results = strictResults.length > 0 ? strictResults : fallbackResults;
 
-        /* 
-        if (isGenericFallback) {
-             ... (removed logic)
-        }
-        */
-
-        // If direct search didn't yield results (or wasn't needed), process the AI recommendations
-        if (books.length === 0) {
-            // Search for each recommended book with fallback queries
-            const booksPromises = analysis.recommendations.map(async (rec) => {
-                try {
-                    // Try primary search: "title author"
-                    const primaryQuery = `${rec.title} ${rec.author}`;
-                    console.log('Searching for:', primaryQuery);
-
-                    let results = await searchGoogleBooks(primaryQuery, 3);
-
-                    // If no results, try alternative queries
-                    if (results.length === 0) {
-                        console.log('No results for primary query, trying alternatives...');
-                        const alternatives = getAlternativeQueries(rec);
-
-                        for (const altQuery of alternatives) {
-                            results = await searchGoogleBooks(altQuery, 3);
-                            if (results.length > 0) {
-                                console.log('Found with alternative query:', altQuery);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (results.length > 0) {
-                        // Find the best match (prefer exact title match)
-                        const bestMatch = results.find(book =>
-                            book.title.toLowerCase().includes(rec.title.toLowerCase().split(':')[0].trim())
-                        ) || results[0];
-
-                        const prices = await fetchAllPrices(bestMatch.isbn, bestMatch.id, region);
-                        console.log('Found book:', bestMatch.title);
-                        return { ...bestMatch, prices } as BookWithPrices;
-                    }
-
-                    console.log('Could not find book:', rec.title);
-                    return null;
-                } catch (error) {
-                    console.error('Error searching for book:', rec.title, error);
-                    return null;
+                if (results.length > 0) {
+                    const bestMatch = results[0];
+                    const prices = await fetchAllPrices(bestMatch.isbn, bestMatch.id, region);
+                    // AI books get a specific reason
+                    return { ...bestMatch, prices, explanation: rec.reason } as BookWithPrices & { explanation?: string };
                 }
-            });
+                return null;
+            } catch (e) {
+                console.error('Hydration failed for:', rec.title, e);
+                return null;
+            }
+        };
 
-            const booksWithNulls = await Promise.all(booksPromises);
-            books = booksWithNulls.filter((b): b is BookWithPrices => b !== null);
+        const hydratedAiBooks: (BookWithPrices & { explanation?: string })[] = [];
+        console.log(`[MoodAPI] Hydrating ${recommendations.length} recommendations in parallel`);
+
+        try {
+            const batchResults = await Promise.all(recommendations.map(processRecommendation));
+            hydratedAiBooks.push(...batchResults.filter((b): b is BookWithPrices & { explanation?: string } => b !== null));
+        } catch (error) {
+            console.error(`[MoodAPI] Hydration completely failed`, error);
         }
 
-        console.log('Successfully found', books.length, 'books');
+        console.log(`[MoodAPI] Hydration complete. Found ${hydratedAiBooks.length} books.`);
+
+        // Fetch prices for direct results
+        const directBooksWithPrices = await Promise.all(directResults.map(async (b: any) => {
+            const prices = await fetchAllPrices(b.isbn, b.id, region);
+            return { ...b, prices, explanation: 'Direct Match' } as BookWithPrices & { explanation?: string };
+        }));
+
+        // Context Merge & Deduplication
+        const allBooks = [...directBooksWithPrices, ...hydratedAiBooks];
+        const uniqueBooks = [];
+        const seenIds = new Set();
+        const seenTitles = new Set();
+
+        for (const book of allBooks) {
+            const normTitle = book.title.toLowerCase().trim();
+            if (!seenIds.has(book.id) && !seenTitles.has(normTitle)) {
+                uniqueBooks.push(book);
+                seenIds.add(book.id);
+                seenTitles.add(normTitle);
+            }
+        }
+
+        const books = uniqueBooks;
+
+        console.log('Final unique books:', books.length);
+
+        // Construct a dynamic explanation since the API doesn't return one anymore
+        const explanations = [
+            `I found some perfect matches for your request! ✨`,
+            `Here are some highly-rated books that match that vibe. 📚`,
+            `These picks should be exactly what you're looking for! 💖`,
+            `Anika's top selections for "${mood.length > 20 ? 'this mood' : mood}". 🌟`
+        ];
+        const randomExpl = explanations[Math.floor(Math.random() * explanations.length)];
 
         const result: MoodSearchResult = {
             books,
             mood,
-            aiExplanation: analysis.explanation,
+            aiExplanation: randomExpl,
         };
 
         return NextResponse.json<ApiResponse<MoodSearchResult>>({

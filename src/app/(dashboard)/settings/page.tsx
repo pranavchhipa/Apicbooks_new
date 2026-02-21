@@ -236,19 +236,31 @@ export default function SettingsPage() {
                                 <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-primary-500' : 'text-slate-400'}`} />
                                 <span className={`${theme === 'dark' ? 'text-foreground font-medium' : 'text-slate-500 dark:text-slate-400'}`}>Dark Mode</span>
                             </button>
-                            <div className="relative">
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="w-full p-4 rounded-xl border flex items-center gap-3 transition-all duration-200 bg-secondary border-card-border opacity-60 cursor-not-allowed"
-                                >
-                                    <Sun className="w-5 h-5 text-slate-400" />
-                                    <span className="text-slate-500 font-medium">Light Mode</span>
-                                </button>
-                                <span className="absolute top-[-8px] right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-accent-500/20 text-accent-400 rounded-full border border-accent-500/30">
-                                    Coming Soon
-                                </span>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setTheme('light')}
+                                className={`p-4 rounded-xl border flex items-center gap-3 transition-all duration-200 ${theme === 'light'
+                                    ? 'bg-primary-500/10 border-primary-500/50 ring-1 ring-primary-500/20'
+                                    : 'bg-secondary border-card-border hover:border-slate-400 dark:hover:border-slate-600'
+                                    }`}
+                            >
+                                <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-primary-500' : 'text-slate-400'}`} />
+                                <span className={`${theme === 'light' ? 'text-foreground font-medium' : 'text-slate-500 dark:text-slate-400'}`}>Light Mode</span>
+                            </button>
+                        </div>
+
+                        <div className="mt-3 relative">
+                            <button
+                                type="button"
+                                disabled
+                                className="w-full p-4 rounded-xl border flex items-center gap-3 transition-all duration-200 bg-secondary border-card-border opacity-60 cursor-not-allowed"
+                            >
+                                <Sparkles className="w-5 h-5 text-slate-400" />
+                                <span className="text-slate-500 font-medium">Custom Mode</span>
+                            </button>
+                            <span className="absolute top-[-8px] right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-accent-500/20 text-accent-400 rounded-full border border-accent-500/30">
+                                Coming Soon
+                            </span>
                         </div>
                     </section>
                 </div>
@@ -260,7 +272,7 @@ export default function SettingsPage() {
                         <h3 className="text-lg font-semibold text-foreground mb-4">Account</h3>
 
                         <div className="space-y-4">
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0a0e27]/50 border border-[#1e2749]">
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary dark:bg-[#0c0a14]/50 border border-card-border">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500/30 to-accent-500/30 flex items-center justify-center">
                                     <span className="text-sm font-bold text-primary-400">
                                         {user?.email?.[0]?.toUpperCase() || 'U'}
@@ -274,7 +286,7 @@ export default function SettingsPage() {
 
                             <button
                                 type="button"
-                                className="w-full p-3 rounded-xl bg-[#0a0e27]/50 border border-[#1e2749] flex items-center justify-between text-left hover:border-slate-600 transition-colors group"
+                                className="w-full p-3 rounded-xl bg-secondary dark:bg-[#0c0a14]/50 border border-card-border flex items-center justify-between text-left hover:border-slate-600 transition-colors group"
                             >
                                 <div className="flex items-center gap-3">
                                     <Lock className="w-4 h-4 text-slate-400" />
@@ -293,7 +305,7 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between py-2 border-b border-[#1e2749]/50">
+                            <div className="flex items-center justify-between py-2 border-b border-card-border/50">
                                 <span className="text-sm text-slate-400">Region</span>
                                 <span className="text-sm font-medium text-white flex items-center gap-2">
                                     <div className="relative w-5 h-3.5 rounded-sm overflow-hidden">
@@ -307,7 +319,7 @@ export default function SettingsPage() {
                                     {selectedRegion.name}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b border-[#1e2749]/50">
+                            <div className="flex items-center justify-between py-2 border-b border-card-border/50">
                                 <span className="text-sm text-slate-400">Currency</span>
                                 <span className="text-sm font-medium text-white">
                                     {selectedRegion.symbol} {selectedRegion.currency}

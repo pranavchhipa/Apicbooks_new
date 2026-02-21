@@ -55,7 +55,7 @@ function AcademicShelf({ userId }: { userId: string }) {
 
     if (books.length === 0) {
         return (
-            <div className="p-12 text-center bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 border border-[#1e2749] rounded-2xl">
+            <div className="p-12 text-center bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 border border-card-border rounded-2xl">
                 <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="w-8 h-8 text-indigo-400" />
                 </div>
@@ -73,7 +73,7 @@ function AcademicShelf({ userId }: { userId: string }) {
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
             {books.map(book => (
-                <div key={book.id} className="group relative aspect-[2/3] bg-slate-800 rounded-xl overflow-hidden border border-[#1e2749] hover:border-indigo-500/50 transition-all hover:scale-105 hover:shadow-lg">
+                <div key={book.id} className="group relative aspect-[2/3] bg-slate-800 rounded-xl overflow-hidden border border-card-border hover:border-indigo-500/50 transition-all hover:scale-105 hover:shadow-lg">
                     {book.cover_url ? (
                         <Image src={book.cover_url} alt={book.title} fill className="object-cover" />
                     ) : (
@@ -117,7 +117,7 @@ function ReviewsList({ userId }: { userId: string }) {
 
     if (reviews.length === 0) {
         return (
-            <div className="p-12 text-center bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 border border-[#1e2749] rounded-2xl">
+            <div className="p-12 text-center bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 border border-card-border rounded-2xl">
                 <Edit3 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-bold text-white mb-2">No Reviews Yet</h3>
                 <p className="text-slate-400">Rate or review books in your library to see them here.</p>
@@ -131,7 +131,7 @@ function ReviewsList({ userId }: { userId: string }) {
                 <Link
                     key={item.id}
                     href={`/book/${item.book_id}`}
-                    className="bg-gradient-to-r from-[#141b3d]/80 to-[#0d1128]/80 border border-[#1e2749] p-4 rounded-xl flex gap-4 hover:border-amber-500/30 transition-colors"
+                    className="bg-gradient-to-r from-[#141b3d]/80 to-[#0d1128]/80 border border-card-border p-4 rounded-xl flex gap-4 hover:border-amber-500/30 transition-colors"
                 >
                     <div className="relative w-16 h-24 flex-shrink-0 bg-slate-800 rounded-lg overflow-hidden">
                         {item.book?.cover_url && (
@@ -234,7 +234,7 @@ export default function ProfilePage() {
         <div className="max-w-6xl mx-auto animate-fade-in pb-12">
             {/* Profile Header */}
             <div className="mb-8">
-                <div className="bg-gradient-to-br from-[#141b3d]/95 to-[#0d1128]/95 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 shadow-2xl">
+                <div className="bg-gradient-to-br from-[#141b3d]/95 to-[#0d1128]/95 backdrop-blur-xl border border-card-border rounded-2xl p-6 shadow-2xl">
                     <div className="flex flex-col md:flex-row md:items-end gap-6">
                         {/* Avatar */}
                         <div className="relative mx-auto md:mx-0">
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="absolute -bottom-2 -right-2 p-2 bg-[#141b3d] rounded-lg text-slate-300 hover:text-white border border-[#1e2749] shadow-lg hover:border-primary-500/50 transition-all"
+                                className="absolute -bottom-2 -right-2 p-2 bg-[#141b3d] rounded-lg text-slate-300 hover:text-white border border-card-border shadow-lg hover:border-primary-500/50 transition-all"
                             >
                                 <Edit3 className="w-4 h-4" />
                             </button>
@@ -271,20 +271,20 @@ export default function ProfilePage() {
 
                             {/* Quick Info Tags */}
                             <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/50 border border-[#1e2749] text-xs text-slate-400">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-secondary dark:bg-[#0c0a14]/50 border border-card-border text-xs text-slate-400">
                                     <MapPin className="w-3 h-3" />
                                     {profile?.location || "Unknown Location"}
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/50 border border-[#1e2749] text-xs text-slate-400">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-secondary dark:bg-[#0c0a14]/50 border border-card-border text-xs text-slate-400">
                                     <Calendar className="w-3 h-3" />
                                     Joined {joinDate}
                                 </span>
                                 {/* Social Stats */}
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/80 border border-[#1e2749] text-xs text-slate-300 hover:border-primary-500/50 transition-colors cursor-pointer">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/80 border border-card-border text-xs text-slate-300 hover:border-primary-500/50 transition-colors cursor-pointer">
                                     <User className="w-3 h-3 text-primary-400" />
                                     0 Followers
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/80 border border-[#1e2749] text-xs text-slate-300 hover:border-primary-500/50 transition-colors cursor-pointer">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0a0e27]/80 border border-card-border text-xs text-slate-300 hover:border-primary-500/50 transition-colors cursor-pointer">
                                     <User className="w-3 h-3 text-primary-400" />
                                     0 Following
                                 </span>
@@ -313,7 +313,7 @@ export default function ProfilePage() {
                             </button>
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="px-5 py-2.5 bg-[#0a0e27] border border-[#1e2749] text-white rounded-xl font-medium text-sm flex items-center gap-2 hover:border-slate-600 transition-all"
+                                className="px-5 py-2.5 bg-secondary dark:bg-[#0c0a14] border border-card-border text-white rounded-xl font-medium text-sm flex items-center gap-2 hover:border-slate-600 transition-all"
                             >
                                 <Edit3 className="w-4 h-4" />
                                 Edit
@@ -323,7 +323,7 @@ export default function ProfilePage() {
 
                     {/* Bio */}
                     {(profile?.bio || user?.user_metadata?.bio) && (
-                        <p className="mt-6 text-slate-300 text-sm leading-relaxed max-w-2xl border-t border-[#1e2749] pt-6">
+                        <p className="mt-6 text-slate-300 text-sm leading-relaxed max-w-2xl border-t border-card-border pt-6">
                             "{profile?.bio || user?.user_metadata?.bio}"
                         </p>
                     )}
@@ -403,7 +403,7 @@ export default function ProfilePage() {
                     />
 
                     {/* Achievements */}
-                    <section className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+                    <section className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-card-border rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <Trophy className="w-5 h-5 text-amber-400" />
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                                     key={i}
                                     className={`aspect-square rounded-xl border flex flex-col items-center justify-center transition-all ${achievement.unlocked
                                         ? 'bg-amber-500/10 border-amber-500/30'
-                                        : 'bg-[#0a0e27]/50 border-[#1e2749] opacity-50'
+                                        : 'bg-[#0a0e27]/50 border-card-border opacity-50'
                                         }`}
                                     title={achievement.label}
                                 >
@@ -437,7 +437,7 @@ export default function ProfilePage() {
                     </section>
 
                     {/* Quick Links */}
-                    <section className="bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+                    <section className="bg-gradient-to-br from-[#141b3d]/60 to-[#0d1128]/60 backdrop-blur-xl border border-card-border rounded-2xl p-6">
                         <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
 
                         <div className="space-y-2">

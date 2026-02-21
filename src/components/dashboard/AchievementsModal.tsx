@@ -37,34 +37,34 @@ export default function AchievementsModal({ isOpen, onClose, achievements, xp, l
             onClick={onClose}
         >
             <div
-                className="w-full max-w-md bg-[#0a0e27] border border-[#1e2749] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-scale-in"
+                className="w-full max-w-md bg-secondary dark:bg-[#0c0a14] border border-card-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-scale-in"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-6 border-b border-[#1e2749] flex items-center justify-between shrink-0">
+                <div className="p-6 border-b border-card-border flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-lg shadow-amber-500/20">
-                            <Trophy className="w-5 h-5 text-white" />
+                            <Trophy className="w-5 h-5 text-foreground" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">Your Achievements</h2>
+                            <h2 className="text-xl font-bold text-foreground">Your Achievements</h2>
                             <p className={`text-sm font-medium ${currentLevel.color}`}>
                                 Level: {currentLevel.label} ({xp} XP)
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-[#1e2749]">
+                    <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-elevated">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Level Progress */}
                 <div className="px-6 pt-6 pb-2 shrink-0">
-                    <div className="flex justify-between text-xs text-slate-400 mb-2 uppercase font-bold tracking-wider">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-2 uppercase font-bold tracking-wider">
                         <span>{currentLevel.label}</span>
                         <span>{nextLevel ? nextLevel.label : 'Max Level'}</span>
                     </div>
-                    <div className="h-3 bg-[#1e2749] rounded-full overflow-hidden relative">
+                    <div className="h-3 bg-card-border rounded-full overflow-hidden relative">
                         <div
                             className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-accent-500"
                             style={{ width: `${progress}%` }}
@@ -86,14 +86,14 @@ export default function AchievementsModal({ isOpen, onClose, achievements, xp, l
                                 relative p-4 rounded-xl border transition-all duration-300
                                 ${item.isUnlocked
                                     ? 'bg-[#141b3d]/40 border-primary-500/30 shadow-lg shadow-primary-500/5'
-                                    : 'bg-[#0a0e27] border-[#1e2749] opacity-70 grayscale'
+                                    : 'bg-[#0a0e27] border-card-border opacity-70 grayscale'
                                 }
                             `}
                         >
                             <div className="flex items-start gap-4">
                                 <div className={`
                                     p-3 rounded-xl 
-                                    ${item.isUnlocked ? 'bg-primary-500/10 text-primary-400' : 'bg-slate-800 text-slate-600'}
+                                    ${item.isUnlocked ? 'bg-primary-500/10 text-primary-400' : 'bg-slate-800 text-muted-foreground/60'}
                                 `}>
                                     {/* Dynamic Icon */}
                                     {item.icon === 'User' && <User className="w-6 h-6" />}
@@ -106,15 +106,15 @@ export default function AchievementsModal({ isOpen, onClose, achievements, xp, l
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-1">
-                                        <h3 className={`font-bold ${item.isUnlocked ? 'text-white' : 'text-slate-400'}`}>
+                                        <h3 className={`font-bold ${item.isUnlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
                                             {item.title}
                                             {item.isUnlocked && <CheckCircle className="w-4 h-4 inline-block ml-2 text-success-400" />}
                                         </h3>
-                                        <span className={`text-xs font-bold px-2 py-1 rounded bg-[#0a0e27] border border-[#1e2749] ${item.isUnlocked ? 'text-accent-400' : 'text-slate-600'}`}>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded bg-secondary dark:bg-[#0c0a14] border border-card-border ${item.isUnlocked ? 'text-accent-400' : 'text-muted-foreground/60'}`}>
                                             +{item.xp} XP
                                         </span>
                                     </div>
-                                    <p className="text-sm text-slate-400">{item.description}</p>
+                                    <p className="text-sm text-muted-foreground">{item.description}</p>
                                 </div>
                             </div>
                         </div>

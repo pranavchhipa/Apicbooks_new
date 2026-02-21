@@ -17,41 +17,52 @@ interface MoodAnalysis {
 /**
  * Get book recommendations based on a mood/feeling description
  */
-export async function getMoodRecommendations(mood: string): Promise<MoodAnalysis> {
-    const apiKey = process.env.OPENROUTER_API_KEY;
+/**
+ * Get book recommendations based on a mood/feeling description
+ */
+const moodCache = new Map<string, { data: GeminiRecommendation[], timestamp: number }>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
 
-    // Debug logging
-    console.log('OPENROUTER_API_KEY present:', !!apiKey);
+export async function getMoodRecommendations(mood: string): Promise<GeminiRecommendation[]> {
+    const normalizedMood = mood.toLowerCase().trim();
+
+    // Check Cache
+    const cached = moodCache.get(normalizedMood);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        console.log(`[GeminiAPI] Returning cached recommendations for mood: "${normalizedMood}"`);
+        return cached.data;
+    }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
 
     // If no API key, return mock data
     if (!apiKey) {
         console.log('No OpenRouter API key found, using mock recommendations');
-        return getMockRecommendations(mood);
+        return getMockRecommendations(mood).recommendations;
     }
 
-    console.log('Using real OpenRouter API (Claude) for mood:', mood);
+    console.log('Using real OpenRouter API (Claude/Gemini) for mood:', mood);
 
-    const prompt = `You are an expert librarian and book recommendation specialist. A user wants book recommendations based on this mood, feeling, or request: "${mood}"
-
-IMPORTANT INSTRUCTIONS:
-1. Recommend exactly 6 books that best match the user's request
-2. ONLY recommend POPULAR, WELL-KNOWN books that are widely available (bestsellers, award winners, or classics)
-3. Use the EXACT official book title (not subtitles or variations)
-4. Include the MAIN author's full name as it appears on the book cover
-5. If the user mentions a specific genre, theme, or author, prioritize those in your recommendations
-6. Include a diverse mix - different authors, publishers, time periods when appropriate
-
-Respond in this exact JSON format (no markdown, no code blocks):
-{
-  "recommendations": [
-    {"title": "Exact Book Title", "author": "Author Full Name", "reason": "One sentence why this fits"}
-  ],
-  "explanation": "Brief 1-2 sentence summary of how you interpreted their request"
-}
-
-Examples of WELL-KNOWN books: Harry Potter, The Great Gatsby, 1984, Pride and Prejudice, The Hunger Games, Gone Girl, The Alchemist, Atomic Habits, Sapiens, etc.
-
-Return ONLY valid JSON, nothing else.`;
+    const prompt = `You are Anika, an expert book recommender. The user is asking for books based on a plot, mood, or trope: "${mood}".
+    Your task is to identify 10 real, published books that perfectly match this request.
+    
+    CRITICAL INSTRUCTION: You MUST return ONLY a valid JSON array of objects. Do not include markdown formatting, conversational text, or explanation properties outside the array. 
+    
+    Use this exact schema:
+    [
+      { "title": "Exact Book Title", "author": "Firstname Lastname", "reason": "Specific reason why it fits" },
+      ...
+    ]
+    
+    Selection Rules:
+    - Recommend exactly 10 books.
+    - Prioritize popular, high-quality books that fit specific tropes perfectly.
+    - CONTENT GUIDELINE: Default to General Audience/YA suitable books (no explicit content).
+    - EXCEPTION: If user EXPLICITLY asks for "spicy", "steamy", or "adult", you may recommend mature fiction, but strictly prioritize high-quality, widely published novels.
+    - ABSOLUTELY NO CHILDREN'S PICTURE BOOKS. Focus on Chapter Books, YA, and Adult Fiction.
+    - If "alien romance" or "shifter", ensure every book fits that specific niche.
+    
+    Return ONLY valid JSON array.`;
 
     try {
         const response = await fetch(OPENROUTER_API_URL, {
@@ -59,52 +70,191 @@ Return ONLY valid JSON, nothing else.`;
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': 'https://w.apicbooks.com', // Optional, for OpenRouter rankings
-                'X-Title': 'ApicBooks' // Optional
+                'HTTP-Referer': 'https://w.apicbooks.com',
+                'X-Title': 'ApicBooks'
             },
             body: JSON.stringify({
-                model: 'google/gemini-flash-1.5',
+                model: 'google/gemini-2.0-flash-001',
                 messages: [
                     { role: 'user', content: prompt }
                 ],
-                temperature: 0.8,
+                temperature: 0.7,
                 max_tokens: 2000,
             }),
         });
 
         if (!response.ok) {
-            console.error('OpenRouter API error:', response.status, await response.text());
-            return getMockRecommendations(mood);
+            console.error('OpenRouter API error:', response.status);
+            return getMockRecommendations(mood).recommendations;
         }
 
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content || '';
 
-        console.log('OpenRouter raw response:', text.substring(0, 500));
+        console.log('OpenRouter raw response length:', text.length);
 
-        // Parse JSON from response (handle markdown code blocks if present)
+        // Parse JSON from response
         let jsonText = text;
-
-        // Remove markdown code blocks if present
         const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (codeBlockMatch) {
-            jsonText = codeBlockMatch[1];
-        }
+        if (codeBlockMatch) jsonText = codeBlockMatch[1];
 
-        // Find JSON object
-        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        // Use a more generic array matcher
+        const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
+
         if (!jsonMatch) {
-            console.error('No JSON found in OpenRouter response');
-            return getMockRecommendations(mood);
+            console.error('No JSON Array found in OpenRouter response');
+            return getMockRecommendations(mood).recommendations;
         }
 
-        const parsed = JSON.parse(jsonMatch[0]) as MoodAnalysis;
-        console.log('Parsed recommendations:', parsed.recommendations.length, 'books');
+        const parsed = JSON.parse(jsonMatch[0]) as GeminiRecommendation[];
+        console.log('Parsed', parsed.length, 'recommendations');
+
+        // Save to Cache
+        if (parsed.length > 0) {
+            moodCache.set(normalizedMood, { data: parsed, timestamp: Date.now() });
+        }
 
         return parsed;
     } catch (error) {
         console.error('Failed to get OpenRouter recommendations:', error);
-        return getMockRecommendations(mood);
+        return getMockRecommendations(mood).recommendations;
+    }
+}
+
+
+/**
+ * Get "Read Alike" recommendations based on a specific book
+ */
+export async function getReadAlikes(title: string, author: string): Promise<MoodAnalysis | null> {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+
+    if (!apiKey) {
+        return null;
+    }
+
+    const prompt = `You are an expert librarian. The user loves query: "${title}" by "${author}".
+    
+    Recommend 6 books that are "Read Alikes" for this specific book.
+    Focus on:
+    - Similar writing style
+    - Similar themes or tropes
+    - Similar emotional "vibe"
+    
+    Format response as JSON:
+    {
+      "recommendations": [
+        {"title": "Title", "author": "Author", "reason": "Why it's similar (e.g. 'If you liked the witty banter in X...')"}
+      ],
+      "explanation": "Brief context on why these match the seed book."
+    }
+    Return ONLY valid JSON.`;
+
+    try {
+        const response = await fetch(OPENROUTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://w.apicbooks.com',
+                'X-Title': 'ApicBooks'
+            },
+            body: JSON.stringify({
+                model: 'google/gemini-2.0-flash-001',
+                messages: [
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 2000,
+            }),
+        });
+
+        if (!response.ok) throw new Error('API Error');
+
+        const data = await response.json();
+        const text = data.choices?.[0]?.message?.content || '';
+
+        let jsonText = text;
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) jsonText = codeBlockMatch[1];
+
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('No JSON found');
+
+        return JSON.parse(jsonMatch[0]) as MoodAnalysis;
+
+    } catch (error) {
+        console.error('getReadAlikes error:', error);
+        return null;
+    }
+}
+
+/**
+ * Get recommendations based on a user's "Taste Profile" (multiple liked books)
+ */
+export async function getTasteBasedRecommendations(likedBooks: { title: string, author: string }[], genres: string[]): Promise<MoodAnalysis | null> {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+
+    if (!apiKey) return null;
+
+    const booksList = likedBooks.map(b => `"${b.title}" by ${b.author}`).join(', ');
+    const genreList = genres.join(', ');
+
+    const prompt = `You are an expert librarian. The user has a specific taste profile.
+    
+    User's Highly Rated Books: ${booksList}
+    User's Favorite Genres: ${genreList}
+
+    Analyze the common themes, writing styles, and plots in these books.
+    Recommend 6 books that fit this specific taste profile.
+    
+    Rules:
+    - Do NOT recommend books already listed above.
+    - Provide a unique reason connecting the recommendation to the user's taste (e.g., "Since you liked the complex politics in X...").
+    - Focus on hidden gems or highly acclaimed books in similar niches.
+
+    Format response as JSON:
+    {
+      "recommendations": [
+        {"title": "Title", "author": "Author", "reason": "Specific connection to user's taste"}
+      ],
+      "explanation": "Brief analysis of their taste and why these fit."
+    }
+    Return ONLY valid JSON.`;
+
+    try {
+        const response = await fetch(OPENROUTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://w.apicbooks.com',
+                'X-Title': 'ApicBooks'
+            },
+            body: JSON.stringify({
+                model: 'google/gemini-2.0-flash-001',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.7,
+                max_tokens: 2000,
+            }),
+        });
+
+        if (!response.ok) throw new Error('API Error');
+
+        const data = await response.json();
+        const text = data.choices?.[0]?.message?.content || '';
+
+        let jsonText = text;
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) jsonText = codeBlockMatch[1];
+
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('No JSON found');
+
+        return JSON.parse(jsonMatch[0]) as MoodAnalysis;
+
+    } catch (error) {
+        console.error('getTasteBasedRecommendations error:', error);
+        return null;
     }
 }
 

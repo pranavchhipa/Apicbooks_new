@@ -82,7 +82,7 @@ export default function MonthlyStatsChart({ userId, year }: MonthlyStatsChartPro
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-[#1e2749] border border-[#2a3459] rounded-lg px-3 py-2 shadow-lg">
+                <div className="bg-elevated border border-[#2a3459] rounded-lg px-3 py-2 shadow-lg">
                     <p className="text-white font-medium">{label} {selectedYear}</p>
                     <p className="text-primary-400 text-sm">
                         {payload[0].value} {payload[0].value === 1 ? 'book' : 'books'}
@@ -95,7 +95,7 @@ export default function MonthlyStatsChart({ userId, year }: MonthlyStatsChartPro
 
     if (loading) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 animate-pulse">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6 animate-pulse">
                 <div className="h-6 bg-slate-700 rounded w-1/3 mb-4" />
                 <div className="h-48 bg-slate-700/50 rounded" />
             </div>
@@ -103,7 +103,7 @@ export default function MonthlyStatsChart({ userId, year }: MonthlyStatsChartPro
     }
 
     return (
-        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-card-border rounded-2xl p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export default function MonthlyStatsChart({ userId, year }: MonthlyStatsChartPro
                 <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className="bg-[#0a0e27] border border-[#1e2749] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-primary-500"
+                    className="bg-background dark:bg-[#0c0a14] border border-card-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-primary-500"
                 >
                     {[2024, 2025, 2026].map(y => (
                         <option key={y} value={y}>{y}</option>
@@ -173,7 +173,7 @@ export default function MonthlyStatsChart({ userId, year }: MonthlyStatsChartPro
             </div>
 
             {/* Stats Summary */}
-            <div className="mt-4 pt-4 border-t border-[#1e2749] grid grid-cols-2 gap-4">
+            <div className="mt-4 pt-4 border-t border-card-border grid grid-cols-2 gap-4">
                 <div className="text-center">
                     <p className="text-2xl font-bold text-white">{totalBooks}</p>
                     <p className="text-xs text-slate-400">Total Books</p>

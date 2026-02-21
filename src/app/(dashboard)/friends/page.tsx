@@ -98,30 +98,30 @@ export default function FriendsPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-primary-500/10 to-primary-600/5 border border-primary-500/20 rounded-2xl p-6 text-center">
-                    <p className="text-3xl font-bold text-white">{stats.following}</p>
-                    <p className="text-sm text-slate-400">Following</p>
+                    <p className="text-3xl font-bold text-foreground dark:text-white">{stats.following}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Following</p>
                 </div>
                 <div className="bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 rounded-2xl p-6 text-center">
-                    <p className="text-3xl font-bold text-white">{stats.followers}</p>
-                    <p className="text-sm text-slate-400">Followers</p>
+                    <p className="text-3xl font-bold text-foreground dark:text-white">{stats.followers}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Followers</p>
                 </div>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl">
+            <div className="flex gap-2 p-1 bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl">
                 {tabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key
-                            ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/10 text-white border border-primary-500/30'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                            ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/10 text-primary-600 dark:text-white border border-primary-500/30'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-foreground dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                             }`}
                     >
                         {tab.icon}
                         {tab.label}
                         {tab.count !== undefined && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full bg-slate-700 text-xs">
+                            <span className="ml-1 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-300">
                                 {tab.count}
                             </span>
                         )}
@@ -130,11 +130,11 @@ export default function FriendsPage() {
             </div>
 
             {/* Tab Content */}
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+            <div className="bg-white/80 dark:bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
                 {activeTab === 'find' && (
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                            <h3 className="text-foreground dark:text-white font-semibold mb-4 flex items-center gap-2">
                                 <Search className="w-4 h-4 text-slate-400" />
                                 <span>Search All</span>
                             </h3>
@@ -153,8 +153,8 @@ export default function FriendsPage() {
             {/* Info Card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gradient-to-r from-accent-500/10 to-primary-500/10 border border-accent-500/20 rounded-2xl p-6">
-                    <h3 className="text-white font-semibold mb-2">👥 Why follow readers?</h3>
-                    <ul className="text-slate-400 text-sm space-y-2">
+                    <h3 className="text-foreground dark:text-white font-semibold mb-2">👥 Why follow readers?</h3>
+                    <ul className="text-slate-600 dark:text-slate-400 text-sm space-y-2">
                         <li>• See what books your friends are reading</li>
                         <li>• Get book recommendations based on their activity</li>
                         <li>• Build your reading community</li>
@@ -163,8 +163,8 @@ export default function FriendsPage() {
 
                 <div className="bg-gradient-to-br from-primary-500/20 to-purple-500/20 border border-primary-500/30 rounded-2xl p-6 relative overflow-hidden group">
                     <div className="relative z-10">
-                        <h3 className="text-white font-semibold mb-2">💌 Invite Friends</h3>
-                        <p className="text-slate-300 text-sm mb-4">
+                        <h3 className="text-foreground dark:text-white font-semibold mb-2">💌 Invite Friends</h3>
+                        <p className="text-slate-600 dark:text-slate-300 text-sm mb-4">
                             Know someone who loves books? Invite them to ApicBooks!
                         </p>
                         <button className="px-4 py-2 bg-white text-primary-600 rounded-lg text-sm font-bold hover:bg-slate-100 transition-colors shadow-lg">
@@ -172,7 +172,7 @@ export default function FriendsPage() {
                         </button>
                     </div>
                     <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Users className="w-32 h-32 text-white transform translate-x-8 translate-y-8" />
+                        <Users className="w-32 h-32 text-foreground dark:text-white transform translate-x-8 translate-y-8" />
                     </div>
                 </div>
             </div>
