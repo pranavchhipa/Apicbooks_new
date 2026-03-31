@@ -50,7 +50,7 @@ export default function PricingPage() {
 
     return (
         <main className="min-h-screen bg-[#faf8f5] dark:bg-[#0c0a14] text-[#2c1810] dark:text-[#f5f0eb] selection:bg-primary-500/30 selection:text-white">
-            <Navbar />
+            <Navbar user={null} />
 
             <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="text-center mb-16">

@@ -180,10 +180,10 @@ export default function SmartRecommendations() {
                                 const searchResults = await searchBooks(`intitle:${rec.title} inauthor:${rec.author}`, 3, 0, 'US');
 
                                 // Sort by ratingsCount descending (if available), then by valid cover
-                                const sorted = searchResults.sort((a, b) => (b.ratingsCount || 0) - (a.ratingsCount || 0));
+                                const sorted = searchResults.sort((a: any, b: any) => (b.ratingsCount || 0) - (a.ratingsCount || 0));
 
                                 // Default to first result if no ratings, but prefer rated ones
-                                const bestMatch = sorted.find(b => isValidBook(b, existingGoogleIds, existingTitles)) || sorted[0];
+                                const bestMatch = sorted.find((b: any) => isValidBook(b, existingGoogleIds, existingTitles)) || sorted[0];
 
                                 if (bestMatch && isValidBook(bestMatch, existingGoogleIds, existingTitles)) {
                                     hydatedBooks.push({ ...bestMatch, reason: rec.reason });
