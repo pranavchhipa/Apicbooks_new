@@ -36,12 +36,25 @@ export async function updateSession(request: NextRequest) {
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') ||
         request.nextUrl.pathname.startsWith('/settings') ||
         request.nextUrl.pathname.startsWith('/profile') ||
+        request.nextUrl.pathname.startsWith('/my-books') ||
+        request.nextUrl.pathname.startsWith('/clubs') ||
+        request.nextUrl.pathname.startsWith('/folios') ||
+        request.nextUrl.pathname.startsWith('/discover') ||
         request.nextUrl.pathname.startsWith('/wishlist');
 
     const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
 
-    if (isProtectedRoute && !user) {
+    // Auth bypass for dev testing: remove this block when done
+    const bypassAuth = request.nextUrl.searchParams.get('bypass') === 'true' ||
+        request.cookies.get('bypass-auth')?.value === 'true';
+
+    if (isProtectedRoute && !user && !bypassAuth) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    // Set bypass cookie if ?bypass=true is in URL
+    if (bypassAuth && !request.cookies.get('bypass-auth')?.value) {
+        supabaseResponse.cookies.set('bypass-auth', 'true', { path: '/', maxAge: 60 * 60 * 24 });
     }
 
     if (isAuthRoute && user) {

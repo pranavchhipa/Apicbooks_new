@@ -2,180 +2,235 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Users, UserPlus, UserCheck, Search } from 'lucide-react';
-import UserSearch, { FollowList } from '@/components/UserSearch';
-import SuggestedUsers from '@/components/SuggestedUsers';
-import SectionGuideButton from '@/components/dashboard/SectionGuideButton';
+import { Users, UserPlus, Search, BookOpen } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
+interface UserProfile {
+    id: string;
+    full_name: string;
+    avatar_url: string;
+    bio: string;
+}
 
-type Tab = 'find' | 'following' | 'followers';
+interface Activity {
+    id: string;
+    user_id: string;
+    activity_type: string;
+    book_title: string;
+    book_cover: string;
+    club_name: string;
+    metadata: any;
+    created_at: string;
+    user?: { full_name: string; avatar_url: string };
+}
 
 export default function FriendsPage() {
-    const [activeTab, setActiveTab] = useState<Tab>('find');
-    const [userId, setUserId] = useState<string | null>(null);
-    const [stats, setStats] = useState({ following: 0, followers: 0 });
-
+    const [following, setFollowing] = useState<UserProfile[]>([]);
+    const [suggested, setSuggested] = useState<UserProfile[]>([]);
+    const [feed, setFeed] = useState<Activity[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+    const [activeTab, setActiveTab] = useState<'feed' | 'following' | 'find'>('feed');
     const supabase = createClient();
 
-    useEffect(() => {
-        const fetchUserAndStats = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                setUserId(user.id);
+    useEffect(() => { fetchData(); }, []);
 
-                // Step 1: Get raw follows
-                const { data: followingData } = await supabase
-                    .from('follows')
-                    .select('following_id')
-                    .eq('follower_id', user.id);
+    async function fetchData() {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-                const { data: followersData } = await supabase
-                    .from('follows')
-                    .select('follower_id')
-                    .eq('following_id', user.id);
+        const { data: friendships } = await supabase
+            .from('friendships')
+            .select('following_id')
+            .eq('follower_id', user.id);
 
-                let realFollowingCount = 0;
-                let realFollowersCount = 0;
+        const followingIds = friendships?.map(f => f.following_id) || [];
 
-                // Step 2: Validate against profiles (exclude ghosts)
-                if (followingData?.length) {
-                    const ids = followingData.map(f => f.following_id);
-                    const { count } = await supabase
-                        .from('profiles')
-                        .select('id', { count: 'exact', head: true })
-                        .in('id', ids);
-                    realFollowingCount = count || 0;
-                }
+        if (followingIds.length > 0) {
+            const { data: profiles } = await supabase.from('profiles').select('*').in('id', followingIds);
+            setFollowing(profiles || []);
+        }
 
-                if (followersData?.length) {
-                    const ids = followersData.map(f => f.follower_id);
-                    const { count } = await supabase
-                        .from('profiles')
-                        .select('id', { count: 'exact', head: true })
-                        .in('id', ids);
-                    realFollowersCount = count || 0;
-                }
+        const allIds = [...followingIds, user.id];
+        const { data: activities } = await supabase
+            .from('activity_feed')
+            .select('*, user:profiles!activity_feed_user_id_fkey(full_name, avatar_url)')
+            .in('user_id', allIds)
+            .order('created_at', { ascending: false })
+            .limit(30);
+        setFeed(activities || []);
 
-                setStats({
-                    following: realFollowingCount,
-                    followers: realFollowersCount
-                });
-            }
-        };
+        const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('*')
+            .neq('id', user.id)
+            .limit(10);
+        setSuggested((allProfiles || []).filter(p => !followingIds.includes(p.id)));
 
-        fetchUserAndStats();
-    }, []);
+        setLoading(false);
+    }
 
-    const tabs: { key: Tab; label: string; icon: React.ReactNode; count?: number }[] = [
-        { key: 'find', label: 'Find Readers', icon: <Search className="w-4 h-4" /> },
-        { key: 'following', label: 'Following', icon: <UserCheck className="w-4 h-4" />, count: stats.following },
-        { key: 'followers', label: 'Followers', icon: <Users className="w-4 h-4" />, count: stats.followers },
-    ];
+    async function followUser(userId: string) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase.from('friendships').insert({ follower_id: user.id, following_id: userId });
+        fetchData();
+    }
 
-    if (!userId) {
-        return (
-            <div className="max-w-4xl mx-auto animate-pulse">
-                <div className="h-8 bg-slate-700 rounded w-1/3 mb-6" />
-                <div className="h-64 bg-slate-700/30 rounded-2xl" />
-            </div>
-        );
+    async function searchUsers() {
+        if (!searchQuery.trim()) return;
+        const { data } = await supabase.from('profiles').select('*').ilike('full_name', `%${searchQuery}%`).limit(20);
+        setSearchResults(data || []);
+    }
+
+    function getActivityText(a: Activity) {
+        switch (a.activity_type) {
+            case 'book_added': return `added "${a.book_title}" to their shelf`;
+            case 'book_finished': return `finished "${a.book_title}"`;
+            case 'review_posted': return `reviewed "${a.book_title}"`;
+            case 'club_joined': return `joined ${a.club_name}`;
+            case 'club_created': return `created club: ${a.club_name}`;
+            default: return 'was active';
+        }
+    }
+
+    function timeAgo(date: string) {
+        const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+        if (s < 60) return 'just now';
+        if (s < 3600) return `${Math.floor(s / 60)}m`;
+        if (s < 86400) return `${Math.floor(s / 3600)}h`;
+        return `${Math.floor(s / 86400)}d`;
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-            {/* Header */}
-            <div>
-                <h1 className="text-3xl font-display font-bold text-white flex items-center gap-3">
-                    <span className="p-2 rounded-xl bg-accent-500/20 border border-accent-500/30">
-                        <Users className="w-6 h-6 text-accent-400" />
-                    </span>
-                    <span className="gradient-text">Community</span>
-                    <SectionGuideButton section="community" />
-                </h1>
-                <p className="text-slate-400 mt-2">Join the circle of readers</p>
+        <div className="max-w-3xl mx-auto">
+            <div className="mb-8">
+                <h1 className="text-3xl md:text-4xl font-display font-bold text-white">Community</h1>
+                <p className="text-white/40 mt-1">See what your friends are reading</p>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-primary-500/10 to-primary-600/5 border border-primary-500/20 rounded-2xl p-6 text-center">
-                    <p className="text-3xl font-bold text-white">{stats.following}</p>
-                    <p className="text-sm text-slate-400">Following</p>
-                </div>
-                <div className="bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 rounded-2xl p-6 text-center">
-                    <p className="text-3xl font-bold text-white">{stats.followers}</p>
-                    <p className="text-sm text-slate-400">Followers</p>
-                </div>
-            </div>
-
-            {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key
-                            ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/10 text-white border border-primary-500/30'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                            }`}
-                    >
-                        {tab.icon}
-                        {tab.label}
-                        {tab.count !== undefined && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full bg-slate-700 text-xs">
-                                {tab.count}
-                            </span>
-                        )}
+            <div className="flex gap-1 bg-white/[0.03] border border-white/[0.06] p-1 rounded-full w-fit mb-8">
+                {(['feed', 'following', 'find'] as const).map(tab => (
+                    <button key={tab} onClick={() => setActiveTab(tab)}
+                        className={`px-5 py-2 rounded-full text-sm font-medium capitalize transition-all ${activeTab === tab ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-white/40 hover:text-white border border-transparent'}`}>
+                        {tab === 'find' ? 'Find Readers' : tab}
                     </button>
                 ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
-                {activeTab === 'find' && (
-                    <div className="space-y-8">
-                        <div>
-                            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                                <Search className="w-4 h-4 text-slate-400" />
-                                <span>Search All</span>
-                            </h3>
-                            <UserSearch currentUserId={userId} />
+            {activeTab === 'feed' && (
+                <div className="space-y-4">
+                    {feed.length === 0 ? (
+                        <div className="text-center py-16 bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06]">
+                            <Users className="w-14 h-14 text-white/20 mx-auto mb-4" />
+                            <h3 className="text-xl font-display font-semibold text-white mb-2">Your feed is empty</h3>
+                            <p className="text-white/40 mb-6">Follow readers to see their activity</p>
+                            <button onClick={() => setActiveTab('find')} className="px-6 py-2.5 bg-amber-500 text-black font-semibold rounded-xl hover:bg-amber-400 transition-colors">Find Readers</button>
                         </div>
-                    </div>
-                )}
-                {activeTab === 'following' && (
-                    <FollowList userId={userId} type="following" />
-                )}
-                {activeTab === 'followers' && (
-                    <FollowList userId={userId} type="followers" />
-                )}
-            </div>
-
-            {/* Info Card */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-r from-accent-500/10 to-primary-500/10 border border-accent-500/20 rounded-2xl p-6">
-                    <h3 className="text-white font-semibold mb-2">👥 Why follow readers?</h3>
-                    <ul className="text-slate-400 text-sm space-y-2">
-                        <li>• See what books your friends are reading</li>
-                        <li>• Get book recommendations based on their activity</li>
-                        <li>• Build your reading community</li>
-                    </ul>
+                    ) : feed.map(activity => (
+                        <div key={activity.id} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 flex gap-3">
+                            <div className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+                                {activity.user?.avatar_url ? (
+                                    <Image src={activity.user.avatar_url} alt="" width={36} height={36} className="rounded-full" />
+                                ) : (
+                                    <span className="text-sm font-medium text-amber-400">{activity.user?.full_name?.[0] || '?'}</span>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm">
+                                    <span className="font-medium text-white">{activity.user?.full_name}</span>{' '}
+                                    <span className="text-white/60">{getActivityText(activity)}</span>
+                                </p>
+                                <p className="text-xs text-white/30 mt-1">{timeAgo(activity.created_at)}</p>
+                                {activity.book_cover && (
+                                    <div className="mt-3">
+                                        <Image src={activity.book_cover} alt={activity.book_title || ''} width={60} height={90} className="rounded-lg shadow-book" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
+            )}
 
-                <div className="bg-gradient-to-br from-primary-500/20 to-purple-500/20 border border-primary-500/30 rounded-2xl p-6 relative overflow-hidden group">
-                    <div className="relative z-10">
-                        <h3 className="text-white font-semibold mb-2">💌 Invite Friends</h3>
-                        <p className="text-slate-300 text-sm mb-4">
-                            Know someone who loves books? Invite them to ApicBooks!
-                        </p>
-                        <button className="px-4 py-2 bg-white text-primary-600 rounded-lg text-sm font-bold hover:bg-slate-100 transition-colors shadow-lg">
-                            Copy Invite Link
-                        </button>
-                    </div>
-                    <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Users className="w-32 h-32 text-white transform translate-x-8 translate-y-8" />
-                    </div>
+            {activeTab === 'following' && (
+                <div>
+                    {following.length === 0 ? (
+                        <div className="text-center py-16 bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06]">
+                            <UserPlus className="w-14 h-14 text-white/20 mx-auto mb-4" />
+                            <h3 className="text-xl font-display text-white mb-2">Not following anyone yet</h3>
+                            <button onClick={() => setActiveTab('find')} className="px-6 py-2.5 bg-amber-500 text-black font-semibold rounded-xl hover:bg-amber-400 transition-colors mt-4">Find Readers</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {following.map(p => (
+                                <Link href={`/profile/${p.id}`} key={p.id} className="flex items-center gap-3 p-4 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.06] hover:border-white/[0.12] transition-all">
+                                    <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center">
+                                        {p.avatar_url ? <Image src={p.avatar_url} alt="" width={48} height={48} className="rounded-full" /> : <span className="font-medium text-amber-400">{p.full_name?.[0]}</span>}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-white">{p.full_name}</p>
+                                        {p.bio && <p className="text-xs text-white/30 line-clamp-1">{p.bio}</p>}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
-            </div>
+            )}
+
+            {activeTab === 'find' && (
+                <div>
+                    <div className="flex gap-2 mb-6">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                            <input type="text" placeholder="Search readers by name..." value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchUsers()}
+                                className="input-field pl-11" />
+                        </div>
+                        <button onClick={searchUsers} className="px-6 py-2.5 bg-amber-500 text-black font-semibold rounded-xl hover:bg-amber-400 transition-colors">Search</button>
+                    </div>
+
+                    {searchResults.length > 0 && (
+                        <div className="mb-8 space-y-3">
+                            <h3 className="font-display font-semibold text-white">Results</h3>
+                            {searchResults.map(p => (
+                                <div key={p.id} className="flex items-center justify-between p-4 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.06]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+                                            <span className="text-sm font-medium text-amber-400">{p.full_name?.[0]}</span>
+                                        </div>
+                                        <p className="font-medium text-white">{p.full_name}</p>
+                                    </div>
+                                    <button onClick={() => followUser(p.id)} className="text-sm px-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/60 hover:text-white hover:border-white/[0.12] transition-all">Follow</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {suggested.length > 0 && (
+                        <div>
+                            <h3 className="font-display font-semibold text-white mb-4">Suggested Readers</h3>
+                            <div className="space-y-3">
+                                {suggested.map(p => (
+                                    <div key={p.id} className="flex items-center justify-between p-4 bg-white/[0.03] backdrop-blur-xl rounded-xl border border-white/[0.06]">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+                                                <span className="text-sm font-medium text-amber-400">{p.full_name?.[0]}</span>
+                                            </div>
+                                            <p className="font-medium text-white">{p.full_name}</p>
+                                        </div>
+                                        <button onClick={() => followUser(p.id)} className="text-sm px-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white/60 hover:text-white hover:border-white/[0.12] transition-all">Follow</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

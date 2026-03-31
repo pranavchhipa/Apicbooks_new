@@ -1,664 +1,729 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Calendar, FileText, Heart, Tag, Users, Share2, Twitter, Facebook, Copy, Check, ExternalLink, Loader2, ChevronDown, CheckCircle, Globe, Lock, ShoppingCart } from 'lucide-react';
-import PriceTable from '@/components/PriceTable';
-import StarRating from '@/components/StarRating';
-import CommunityReviews from '@/components/CommunityReviews';
-import type { BookWithPrices } from '@/types';
-import { createClient } from '@/lib/supabase/client';
-import { addToLibrary, getBookStatus, updateLibraryProgress, ReadingStatus } from '@/lib/api/library';
-import { toast } from 'sonner';
+import { BookOpen, Calendar, FileText, Tag, Clock, Star, Users, ArrowLeft } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
+import BookDetailClient from './BookDetailClient';
 
-export default function BookDetailPage() {
-    const params = useParams();
-    const router = useRouter();
-    const bookId = params.id as string;
+// ============================================
+// TYPES
+// ============================================
 
-    const [book, setBook] = useState<BookWithPrices | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isCopied, setIsCopied] = useState(false);
-
-    // Shelving State
-    const [shelfStatus, setShelfStatus] = useState<ReadingStatus | null>(null);
-    const [isShelving, setIsShelving] = useState(false);
-    const [showShelfMenu, setShowShelfMenu] = useState(false);
-    // Review State
-    const [rating, setRating] = useState(0);
-    const [reviewText, setReviewText] = useState('');
-    const [isSavingReview, setIsSavingReview] = useState(false);
-
-    // Progress State
-    const [currentPage, setCurrentPage] = useState(0);
-    const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
-    const [isReviewPublic, setIsReviewPublic] = useState(true);
-    const [userId, setUserId] = useState<string | undefined>(undefined);
-    const [internalBookId, setInternalBookId] = useState<string | null>(null);
-
-    const supabase = createClient();
-
-    useEffect(() => {
-        async function fetchBookAndStatus() {
-            setIsLoading(true);
-            setError(null);
-            console.log('[BookDetail] Fetching book:', bookId);
-
-            try {
-                // 1. Fetch Book Details from Google API (via our route)
-                const response = await fetch(`/api/book/${bookId}`);
-                const data = await response.json();
-
-                if (data.success && data.data?.book) {
-                    setBook(data.data.book);
-                    console.log('[BookDetail] Google Book loaded:', data.data.book.title);
-
-                    // 2. Resolve Internal UUID
-                    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(bookId);
-                    let targetUuid: string | null = null;
-
-                    if (isUuid) {
-                        console.log('[BookDetail] ID is UUID, using directly');
-                        targetUuid = bookId;
-                    } else {
-                        const { data: internalBook, error: internalErr } = await supabase
-                            .from('books')
-                            .select('id')
-                            .eq('google_id', bookId)
-                            .single();
-
-                        if (internalErr && internalErr.code !== 'PGRST116') {
-                            console.error('[BookDetail] Error finding internal book:', internalErr);
-                        }
-                        targetUuid = internalBook?.id || null;
-                    }
-
-                    console.log('[BookDetail] Target Internal UUID:', targetUuid || 'Not found');
-
-                    if (targetUuid) {
-                        setInternalBookId(targetUuid);
-
-                        // 3. Fetch User Status (if logged in)
-                        const { data: { user } } = await supabase.auth.getUser();
-                        if (user) {
-                            console.log('[BookDetail] Fetching user status for:', user.id);
-                            const { data: entry, error: entryErr } = await supabase
-                                .from('user_library')
-                                .select('status, rating, review, current_page, is_review_public')
-                                .eq('user_id', user.id)
-                                .eq('book_id', targetUuid) // Use UUID (targetUuid)
-                                .single();
-
-                            console.log('[BookDetail] Library entry:', entry, 'Error:', entryErr);
-
-                            if (entry) {
-                                setShelfStatus(entry.status);
-                                setRating(entry.rating || 0);
-                                setReviewText(entry.review || '');
-                                setCurrentPage(entry.current_page || 0);
-                                setIsReviewPublic(entry.is_review_public !== false);
-                            }
-                            setUserId(user.id);
-                        }
-                    }
-                } else {
-                    setError(data.error || 'Book not found');
-                }
-            } catch (err) {
-                console.error('[BookDetail] Fatal error:', err);
-                setError('Failed to load book details');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        if (bookId) {
-            fetchBookAndStatus();
-        }
-    }, [bookId]);
-
-    const handleShelfUpdate = async (newStatus: ReadingStatus) => {
-        if (!book) return;
-        setIsShelving(true);
-        setShowShelfMenu(false);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                toast.error("Please log in to save books!");
-                return;
-            }
-
-            // addToLibrary returns the library item, which contains the internal book_id
-            const item = await addToLibrary(user.id, bookId, newStatus);
-            if (item && item.book_id) {
-                setInternalBookId(item.book_id);
-            }
-
-            setShelfStatus(newStatus);
-            const statusLabel = newStatus === 'wishlist' ? 'Want to Read' : newStatus === 'reading' ? 'Reading' : 'Finished';
-            toast.success(`Marked as ${statusLabel}`);
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to update shelf");
-        } finally {
-            setIsShelving(false);
-        }
+interface GoogleVolumeInfo {
+    title: string;
+    authors?: string[];
+    description?: string;
+    publishedDate?: string;
+    pageCount?: number;
+    categories?: string[];
+    averageRating?: number;
+    ratingsCount?: number;
+    imageLinks?: {
+        thumbnail?: string;
+        smallThumbnail?: string;
+        small?: string;
+        medium?: string;
+        large?: string;
+        extraLarge?: string;
     };
+    industryIdentifiers?: {
+        type: string;
+        identifier: string;
+    }[];
+    publisher?: string;
+    language?: string;
+    previewLink?: string;
+    infoLink?: string;
+}
 
-    const handleProgressUpdate = async () => {
-        if (!book) return;
-        setIsUpdatingProgress(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+interface GoogleVolume {
+    id: string;
+    volumeInfo: GoogleVolumeInfo;
+}
 
-            // Ensure we have an internal ID (though if we are tracking progress, we should)
-            let currentUUID = internalBookId;
-            if (!currentUUID) {
-                const item = await addToLibrary(user.id, bookId, shelfStatus || 'reading');
-                currentUUID = item.book_id;
-                setInternalBookId(currentUUID);
-            }
+export interface BookData {
+    id: string;
+    title: string;
+    authors: string[];
+    description: string | null;
+    coverUrl: string | null;
+    pageCount: number | null;
+    publishedDate: string | null;
+    categories: string[];
+    rating: number | null;
+    ratingsCount: number | null;
+    isbn: string | null;
+    publisher: string | null;
+    language: string | null;
+    previewLink: string | null;
+}
 
-            await updateLibraryProgress(user.id, currentUUID!, currentPage);
+// ============================================
+// DATA FETCHING
+// ============================================
 
-            // Auto-complete if finished
-            if (book.pageCount && currentPage >= book.pageCount && shelfStatus === 'reading') {
-                await handleShelfUpdate('completed');
-                toast.success("Congratulations on finishing the book!");
-            } else {
-                toast.success("Progress updated!");
-            }
+async function getBookData(id: string): Promise<BookData | null> {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY;
+    const url = `https://www.googleapis.com/books/v1/volumes/${id}${apiKey ? `?key=${apiKey}` : ''}`;
 
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to update progress");
-        } finally {
-            setIsUpdatingProgress(false);
-        }
-    };
+    try {
+        const res = await fetch(url, { next: { revalidate: 3600 } });
 
-    const [lastReviewUpdate, setLastReviewUpdate] = useState(0);
+        if (!res.ok) return null;
 
-    // ...
+        const data: GoogleVolume = await res.json();
+        const v = data.volumeInfo;
 
-    const handleSaveReview = async () => {
-        setIsSavingReview(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+        // Get the best available cover image
+        const coverUrl = v.imageLinks?.large
+            || v.imageLinks?.medium
+            || v.imageLinks?.small
+            || v.imageLinks?.thumbnail?.replace('zoom=1', 'zoom=3')
+            || v.imageLinks?.thumbnail
+            || null;
 
-            // Ensure book is cached and gets UUID
-            let targetUUID = internalBookId;
+        // Get ISBN
+        const isbn13 = v.industryIdentifiers?.find(i => i.type === 'ISBN_13')?.identifier;
+        const isbn10 = v.industryIdentifiers?.find(i => i.type === 'ISBN_10')?.identifier;
 
-            if (!targetUUID) {
-                // If fetching failed or book not in DB yet, create it via addToLibrary
-                // We'll set status to 'completed' as default for reviewing
-                try {
-                    const item = await addToLibrary(user.id, bookId, shelfStatus || 'completed');
-                    targetUUID = item.book_id;
-                    setInternalBookId(targetUUID);
-                    if (!shelfStatus) setShelfStatus('completed');
-                } catch (err) {
-                    console.error("Failed to cache book for review:", err);
-                    throw new Error("Could not initialize book entry");
-                }
-            }
+        return {
+            id: data.id,
+            title: v.title,
+            authors: v.authors || [],
+            description: v.description || null,
+            coverUrl,
+            pageCount: v.pageCount || null,
+            publishedDate: v.publishedDate || null,
+            categories: v.categories || [],
+            rating: v.averageRating || null,
+            ratingsCount: v.ratingsCount || null,
+            isbn: isbn13 || isbn10 || null,
+            publisher: v.publisher || null,
+            language: v.language || null,
+            previewLink: v.previewLink || null,
+        };
+    } catch {
+        return null;
+    }
+}
 
-            console.log("[handleSaveReview] Submitting review:", {
-                targetUUID,
-                rating,
-                reviewText,
-                isReviewPublic
+async function getRelatedBooks(categories: string[], excludeId: string): Promise<BookData[]> {
+    if (!categories.length) return [];
+
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY;
+    const query = `subject:${encodeURIComponent(categories[0])}`;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=6&orderBy=relevance${apiKey ? `&key=${apiKey}` : ''}`;
+
+    try {
+        const res = await fetch(url, { next: { revalidate: 3600 } });
+        if (!res.ok) return [];
+
+        const data = await res.json();
+        if (!data.items) return [];
+
+        return data.items
+            .filter((item: GoogleVolume) => item.id !== excludeId)
+            .slice(0, 4)
+            .map((item: GoogleVolume) => {
+                const v = item.volumeInfo;
+                return {
+                    id: item.id,
+                    title: v.title,
+                    authors: v.authors || [],
+                    description: null,
+                    coverUrl: v.imageLinks?.thumbnail?.replace('zoom=1', 'zoom=2') || null,
+                    pageCount: v.pageCount || null,
+                    publishedDate: v.publishedDate || null,
+                    categories: v.categories || [],
+                    rating: v.averageRating || null,
+                    ratingsCount: v.ratingsCount || null,
+                    isbn: null,
+                    publisher: null,
+                    language: null,
+                    previewLink: null,
+                };
             });
+    } catch {
+        return [];
+    }
+}
 
-            if (!reviewText.trim()) {
-                console.warn("[handleSaveReview] Warning: Review text is empty!");
-            }
+interface CommunityReview {
+    id: string;
+    user_id: string;
+    rating: number;
+    review: string | null;
+    updated_at: string;
+    profiles: {
+        full_name: string | null;
+        avatar_url: string | null;
+    } | null;
+}
 
-            const payload = {
-                user_id: user.id,
-                book_id: targetUUID!,
-                rating: rating,
-                review: reviewText,
-                status: shelfStatus || 'completed',
-                is_review_public: isReviewPublic
-            };
+async function getBookReviews(googleBookId: string): Promise<{ reviews: CommunityReview[]; averageRating: number; internalBookId: string | null }> {
+    try {
+        const supabase = await createClient();
 
-            const { error: upsertError } = await supabase
-                .from('user_library')
-                .upsert(payload, { onConflict: 'user_id,book_id' });
+        // Resolve Google ID to internal UUID
+        const { data: bookRecord } = await supabase
+            .from('books')
+            .select('id')
+            .eq('google_id', googleBookId)
+            .single();
 
-            if (upsertError) {
-                console.error("[handleSaveReview] Upsert error:", upsertError);
-                throw upsertError;
-            }
+        if (!bookRecord) return { reviews: [], averageRating: 0, internalBookId: null };
 
-            toast.success("Review saved!");
+        const { data: reviews } = await supabase
+            .from('user_library')
+            .select(`
+                id,
+                user_id,
+                rating,
+                review,
+                updated_at,
+                profiles:user_id (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .eq('book_id', bookRecord.id)
+            .eq('is_review_public', true)
+            .not('rating', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(10);
 
-            // Log activity for Pulse feed
-            if (isReviewPublic && book) {
-                // Dynamic import to avoid circular dependency issues if any
-                const { logActivity } = await import('@/components/ActivityFeed');
-                await logActivity(
-                    user.id,
-                    'reviewed',
-                    targetUUID!,
-                    book.title,
-                    book.coverUrl || undefined,
-                    {
-                        rating: rating,
-                        review_snippet: reviewText.substring(0, 150) + (reviewText.length > 150 ? '...' : ''), // Store snippet
-                        description: reviewText // Store full text optionally
-                    }
-                );
-            }
+        const reviewsData = (reviews || []) as unknown as CommunityReview[];
+        const avg = reviewsData.length > 0
+            ? reviewsData.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewsData.length
+            : 0;
 
-            setLastReviewUpdate(Date.now()); // Trigger refresh of community reviews
-        } catch (e) {
-            toast.error("Failed to save review");
-            console.error(e);
-        } finally {
-            setIsSavingReview(false);
-        }
-    };
+        return { reviews: reviewsData, averageRating: avg, internalBookId: bookRecord.id };
+    } catch {
+        return { reviews: [], averageRating: 0, internalBookId: null };
+    }
+}
 
-    const handleShare = async (platform: string) => {
-        const url = window.location.href;
-        const text = book ? `Check out "${book.title}" on ApicBooks!` : 'Check out this book on ApicBooks!';
+async function getClubsReadingBook(googleBookId: string): Promise<{ id: string; name: string; member_count: number }[]> {
+    try {
+        const supabase = await createClient();
 
-        switch (platform) {
-            case 'twitter':
-                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-                break;
-            case 'facebook':
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-                break;
-            case 'copy':
-                await navigator.clipboard.writeText(url);
-                setIsCopied(true);
-                setTimeout(() => setIsCopied(false), 2000);
-                break;
-        }
-    };
+        const { data: bookRecord } = await supabase
+            .from('books')
+            .select('id')
+            .eq('google_id', googleBookId)
+            .single();
 
-    const SHELF_OPTIONS: { label: string, value: ReadingStatus, color: string }[] = [
-        { label: 'Want to Read', value: 'wishlist', color: 'text-rose-400' },
-        { label: 'Reading', value: 'reading', color: 'text-primary-400' },
-        { label: 'Finished', value: 'completed', color: 'text-emerald-400' },
-    ];
+        if (!bookRecord) return [];
 
-    const currentShelfOption = SHELF_OPTIONS.find(o => o.value === shelfStatus);
+        const { data: clubs } = await supabase
+            .from('club_books')
+            .select(`
+                clubs (
+                    id,
+                    name,
+                    member_count
+                )
+            `)
+            .eq('book_id', bookRecord.id)
+            .limit(5);
 
-    if (isLoading) {
-        return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
-                    <p className="text-slate-400">Loading book details...</p>
+        if (!clubs) return [];
+
+        return clubs
+            .map((c: any) => c.clubs)
+            .filter(Boolean)
+            .map((club: any) => ({
+                id: club.id,
+                name: club.name,
+                member_count: club.member_count || 0,
+            }));
+    } catch {
+        return [];
+    }
+}
+
+// ============================================
+// LOADING / ERROR STATES
+// ============================================
+
+function BookSkeleton() {
+    return (
+        <div className="min-h-screen bg-midnight">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="animate-pulse">
+                    <div className="h-5 w-20 bg-white/[0.08] rounded mb-10" />
+                    <div className="grid md:grid-cols-3 gap-10">
+                        <div className="md:col-span-1">
+                            <div className="aspect-[2/3] rounded-2xl bg-white/[0.04]" />
+                        </div>
+                        <div className="md:col-span-2 space-y-6">
+                            <div className="h-10 w-3/4 bg-white/[0.04] rounded" />
+                            <div className="h-6 w-1/2 bg-white/[0.04] rounded" />
+                            <div className="space-y-3">
+                                <div className="h-4 w-full bg-white/[0.04] rounded" />
+                                <div className="h-4 w-full bg-white/[0.04] rounded" />
+                                <div className="h-4 w-2/3 bg-white/[0.04] rounded" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
+}
 
-    if (error || !book) {
+// ============================================
+// PAGE COMPONENT (Server)
+// ============================================
+
+interface PageProps {
+    params: { id: string };
+}
+
+export default async function BookDetailPage({ params }: PageProps) {
+    const { id } = await params;
+
+    const [book, { reviews, averageRating, internalBookId }, clubs] = await Promise.all([
+        getBookData(id),
+        getBookReviews(id),
+        getClubsReadingBook(id),
+    ]);
+
+    if (!book) {
         return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl text-center py-12 px-8">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-red-500/10 rounded-2xl flex items-center justify-center">
-                        <BookOpen className="w-10 h-10 text-red-400" />
+            <div className="min-h-screen bg-midnight flex items-center justify-center px-4">
+                <div className="text-center max-w-md">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-white/[0.06]">
+                        <BookOpen className="w-10 h-10 text-amber-400" />
                     </div>
-                    <h2 className="text-2xl font-semibold text-white mb-2">Book Not Found</h2>
-                    <p className="text-slate-400 mb-6">{error || 'The book you are looking for does not exist.'}</p>
-                    <Link href="/discover" className="btn-gradient inline-block">
-                        Back to Discover
+                    <h2 className="text-2xl font-display font-bold text-white mb-2">
+                        Book Not Found
+                    </h2>
+                    <p className="text-white/50 mb-6 font-serif">
+                        We couldn&apos;t find the book you&apos;re looking for. It may have been removed or the link may be incorrect.
+                    </p>
+                    <Link href="/discover" className="btn-primary inline-flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        Browse Books
                     </Link>
                 </div>
             </div>
         );
     }
 
+    const relatedBooks = await getRelatedBooks(book.categories, id);
     const readingTime = book.pageCount ? Math.round(book.pageCount / 40) : null;
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in relative">
-            {/* Back Button */}
-            {/* Back Button */}
-            <button
-                onClick={() => router.back()}
-                className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 group"
-            >
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                Back
-            </button>
+    // Strip HTML from description for plain text display
+    const plainDescription = book.description
+        ? book.description.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ')
+        : null;
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                {/* Book Cover */}
-                <div className="lg:col-span-1">
-                    <div className="sticky top-24 space-y-4">
-                        <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#141b3d] border border-[#1e2749] group shadow-xl">
-                            {book.coverUrl ? (
-                                <Image
-                                    src={book.coverUrl}
-                                    alt={book.title}
-                                    fill
-                                    sizes="(max-width: 1024px) 100vw, 33vw"
-                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                    priority
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-500/20 to-accent-500/20">
-                                    <BookOpen className="w-24 h-24 text-primary-400/50" />
+    return (
+        <div className="min-h-screen bg-midnight">
+            {/* Hero Header with book cover background blur */}
+            <div className="relative bg-midnight overflow-hidden">
+                {/* Blurred cover background */}
+                {book.coverUrl && (
+                    <div className="absolute inset-0">
+                        <Image
+                            src={book.coverUrl}
+                            alt=""
+                            fill
+                            className="object-cover opacity-20 blur-2xl scale-110"
+                            priority={false}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-midnight/80 via-midnight/90 to-midnight" />
+                    </div>
+                )}
+
+                <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pb-24">
+                    {/* Back Button */}
+                    <Link
+                        href="/discover"
+                        className="inline-flex items-center gap-2 text-white/40 hover:text-amber-400 transition-colors mb-8 text-sm font-medium group"
+                    >
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        Back to Discover
+                    </Link>
+
+                    <div className="grid md:grid-cols-3 gap-8 lg:gap-12 items-start">
+                        {/* Book Cover */}
+                        <div className="md:col-span-1 flex justify-center md:justify-start">
+                            <div className="relative w-56 sm:w-64 md:w-full max-w-[280px]">
+                                <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
+                                    {book.coverUrl ? (
+                                        <Image
+                                            src={book.coverUrl}
+                                            alt={book.title}
+                                            fill
+                                            sizes="(max-width: 768px) 250px, 280px"
+                                            className="object-cover"
+                                            priority
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-white/[0.04] to-white/[0.02] p-6 text-center">
+                                            <BookOpen className="w-16 h-16 text-white/20 mb-3" />
+                                            <span className="text-sm font-serif text-white/30 line-clamp-3">
+                                                {book.title}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="space-y-3">
-                            {/* Read Online Button - Open Library */}
-                            {book.readLink && (
-                                <a
-                                    href={book.readLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold btn-primary shadow-lg shadow-primary-500/20 group"
-                                >
-                                    <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    Read Online
-                                </a>
+                        {/* Book Info */}
+                        <div className="md:col-span-2">
+                            {/* Categories */}
+                            {book.categories.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {book.categories.map((cat, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-3 py-1 rounded-full bg-white/[0.06] text-white/60 text-xs font-medium border border-white/[0.06]"
+                                        >
+                                            {cat}
+                                        </span>
+                                    ))}
+                                </div>
                             )}
 
-                            {/* Audiobook Button - LibriVox */}
-                            {book.audiobookUrl && (
-                                <a
-                                    href={book.audiobookUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all duration-300 group"
-                                >
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-emerald-400 blur-sm opacity-50 animate-pulse"></div>
-                                        <Users className="w-5 h-5 relative z-10" />
-                                    </div>
-                                    Listen Free {book.audiobookDuration && `(${book.audiobookDuration})`}
-                                </a>
-                            )}
+                            {/* Title */}
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white leading-tight mb-3">
+                                {book.title}
+                            </h1>
 
-                            {/* Shelving Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowShelfMenu(!showShelfMenu)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition-all duration-300 border ${currentShelfOption
-                                        ? 'bg-[#1e2749] border-primary-500 text-white'
-                                        : 'btn-secondary text-slate-300'
-                                        }`}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        {isShelving ? <Loader2 className="w-5 h-5 animate-spin" /> : <BookOpen className="w-5 h-5" />}
-                                        {currentShelfOption ? currentShelfOption.label : 'Add to My Books'}
-                                    </span>
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${showShelfMenu ? 'rotate-180' : ''}`} />
-                                </button>
+                            {/* Author */}
+                            <p className="text-lg sm:text-xl text-white/60 font-serif mb-6">
+                                by {book.authors.length > 0 ? book.authors.join(', ') : 'Unknown Author'}
+                            </p>
 
-                                {showShelfMenu && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-[#0a0e27] border border-[#1e2749] rounded-xl shadow-2xl z-50 animate-fade-in-up">
-                                        {SHELF_OPTIONS.map((option) => (
-                                            <button
-                                                key={option.value}
-                                                onClick={() => handleShelfUpdate(option.value)}
-                                                className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#1e2749] transition-colors text-left group ${shelfStatus === option.value ? 'bg-primary-500/10' : ''
+                            {/* Rating & Meta */}
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
+                                {/* Rating */}
+                                {(book.rating || averageRating > 0) && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1">
+                                            {Array.from({ length: 5 }).map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    className={`w-4 h-4 ${
+                                                        i < Math.round(book.rating || averageRating)
+                                                            ? 'text-amber-400 fill-amber-400'
+                                                            : 'text-white/20'
                                                     }`}
-                                            >
-                                                <div className={`w-2 h-2 rounded-full ${option.color.replace('text-', 'bg-')}`} />
-                                                <span className={`flex-1 font-medium ${shelfStatus === option.value ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
-                                                    {option.label}
-                                                </span>
-                                                {shelfStatus === option.value && <CheckCircle className="w-4 h-4 text-primary-400" />}
-                                            </button>
-                                        ))}
+                                                />
+                                            ))}
+                                        </div>
+                                        <span className="text-white/80 font-medium">
+                                            {(book.rating || averageRating).toFixed(1)}
+                                        </span>
+                                        {(book.ratingsCount || reviews.length > 0) && (
+                                            <span className="text-white/40">
+                                                ({book.ratingsCount || reviews.length} {(book.ratingsCount || reviews.length) === 1 ? 'rating' : 'ratings'})
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Page count */}
+                                {book.pageCount && (
+                                    <div className="flex items-center gap-1.5 text-white/40">
+                                        <FileText className="w-4 h-4" />
+                                        <span>{book.pageCount} pages</span>
+                                    </div>
+                                )}
+
+                                {/* Published date */}
+                                {book.publishedDate && (
+                                    <div className="flex items-center gap-1.5 text-white/40">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{book.publishedDate}</span>
+                                    </div>
+                                )}
+
+                                {/* Reading time */}
+                                {readingTime && (
+                                    <div className="flex items-center gap-1.5 text-white/40">
+                                        <Clock className="w-4 h-4" />
+                                        <span>~{readingTime}h read</span>
                                     </div>
                                 )}
                             </div>
 
-                        </div>
-
-                        {/* Reading Progress Widget */}
-                        {shelfStatus === 'reading' && (
-                            <div className="bg-[#1e2749]/50 border border-[#1e2749] rounded-xl p-4 mb-4 animate-fade-in-up">
-                                <h3 className="text-sm font-semibold text-white mb-3 flex items-center justify-between">
-                                    <span>Reading Progress</span>
-                                    <span className="text-xs text-primary-400">
-                                        {Math.round((currentPage / (book.pageCount || 1)) * 100)}%
+                            {/* Publisher & ISBN */}
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-white/30">
+                                {book.publisher && (
+                                    <span>Published by {book.publisher}</span>
+                                )}
+                                {book.isbn && (
+                                    <span className="flex items-center gap-1">
+                                        <Tag className="w-3 h-3" />
+                                        ISBN: {book.isbn}
                                     </span>
-                                </h3>
-
-                                {/* Progress Bar */}
-                                <div className="w-full h-2 bg-slate-700/50 rounded-full overflow-hidden mb-4">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-500"
-                                        style={{ width: `${Math.min(100, (currentPage / (book.pageCount || 1)) * 100)}%` }}
-                                    />
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <div className="relative flex-1">
-                                        <input
-                                            type="number"
-                                            value={currentPage}
-                                            onChange={(e) => setCurrentPage(Math.min(Number(e.target.value), book.pageCount || 10000))}
-                                            className="w-full bg-[#0a0e27] border border-[#1e2749] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500"
-                                            placeholder="Page"
-                                        />
-                                        <span className="absolute right-3 top-2 text-xs text-slate-500">
-                                            / {book.pageCount || '?'}
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={handleProgressUpdate}
-                                        disabled={isUpdatingProgress}
-                                        className="bg-primary-500 hover:bg-primary-600 text-white p-2 rounded-lg transition-colors disabled:opacity-50"
-                                    >
-                                        {isUpdatingProgress ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Share Buttons */}
-                        <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Share2 className="w-4 h-4 text-slate-400" />
-                                <span className="text-sm text-slate-400">Share this book</span>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleShare('twitter')}
-                                    className="flex-1 p-3 rounded-xl bg-[#1e2749] hover:bg-[#1DA1F2]/20 text-slate-400 hover:text-[#1DA1F2] transition-colors"
-                                    aria-label="Share on Twitter"
-                                >
-                                    <Twitter className="w-5 h-5 mx-auto" />
-                                </button>
-                                <button
-                                    onClick={() => handleShare('facebook')}
-                                    className="flex-1 p-3 rounded-xl bg-[#1e2749] hover:bg-[#1877F2]/20 text-slate-400 hover:text-[#1877F2] transition-colors"
-                                    aria-label="Share on Facebook"
-                                >
-                                    <Facebook className="w-5 h-5 mx-auto" />
-                                </button>
-                                <button
-                                    onClick={() => handleShare('copy')}
-                                    className="flex-1 p-3 rounded-xl bg-[#1e2749] hover:bg-success-500/20 text-slate-400 hover:text-success-400 transition-colors"
-                                    aria-label="Copy link"
-                                >
-                                    {isCopied ? (
-                                        <Check className="w-5 h-5 mx-auto text-success-400" />
-                                    ) : (
-                                        <Copy className="w-5 h-5 mx-auto" />
-                                    )}
-                                </button>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Book Info */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Title & Author */}
-                    <div>
-                        <h1 className="text-3xl lg:text-4xl font-display font-bold text-white mb-2">
-                            {book.title}
-                        </h1>
-                        <p className="text-xl text-slate-400">
-                            by {book.authors?.join(', ') || 'Unknown Author'}
-                        </p>
-                    </div>
-
-                    {/* Meta Info */}
-                    <div className="flex flex-wrap gap-4">
-                        {book.publishedDate && (
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <Calendar className="w-4 h-4" />
-                                <span>{book.publishedDate}</span>
+            {/* Content Area */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 pb-16">
+                <div className="grid lg:grid-cols-3 gap-8">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Client-side interactive section (shelf actions, progress, review) */}
+                        <Suspense fallback={
+                            <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 animate-pulse">
+                                <div className="flex gap-3">
+                                    <div className="h-12 flex-1 bg-white/[0.04] rounded-xl" />
+                                    <div className="h-12 flex-1 bg-white/[0.04] rounded-xl" />
+                                    <div className="h-12 flex-1 bg-white/[0.04] rounded-xl" />
+                                </div>
                             </div>
-                        )}
-                        {book.pageCount && book.pageCount > 0 && (
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <FileText className="w-4 h-4" />
-                                <span>{book.pageCount} pages</span>
-                            </div>
-                        )}
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <Tag className="w-4 h-4" />
-                            <span>ISBN: {book.isbn}</span>
-                        </div>
-                        {readingTime && (
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <BookOpen className="w-4 h-4" />
-                                <span>~{readingTime}h read</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Categories */}
-                    {book.categories && book.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                            {book.categories.map((category, i) => (
-                                <span key={i} className="px-3 py-1 rounded-lg bg-primary-500/10 text-primary-400 text-sm font-medium border border-primary-500/20">
-                                    {category}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Description */}
-                    {book.description && (
-                        <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
-                            <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-primary-400" />
-                                About This Book
-                            </h2>
-                            <div
-                                className="text-slate-300 leading-relaxed prose prose-invert max-w-none prose-p:text-slate-300 prose-a:text-primary-400"
-                                dangerouslySetInnerHTML={{ __html: book.description }}
+                        }>
+                            <BookDetailClient
+                                bookId={id}
+                                bookTitle={book.title}
+                                bookCoverUrl={book.coverUrl}
+                                pageCount={book.pageCount}
+                                internalBookId={internalBookId}
                             />
-                        </div>
-                    )}
+                        </Suspense>
 
-                    {/* Community Reviews - Show first for social proof */}
-                    {internalBookId && (
-                        <CommunityReviews
-                            key={`reviews-${lastReviewUpdate}`}
-                            bookId={internalBookId}
-                            currentUserId={userId}
-                        />
-                    )}
-
-                    {/* My Review - Only for Finished Books */}
-                    {shelfStatus === 'completed' && (
-                        <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 animate-fade-in">
-                            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-accent-400" />
-                                My Review
-                            </h2>
-
-                            <div className="space-y-4">
-                                {/* Rating Input with Half-Stars */}
-                                <div className="flex items-center gap-3">
-                                    <span className="text-slate-400 text-sm">Rating:</span>
-                                    <StarRating
-                                        rating={rating}
-                                        onChange={setRating}
-                                        size="lg"
-                                        showValue
-                                    />
-                                </div>
-
-                                <textarea
-                                    className="w-full bg-[#0a0e27] border border-[#1e2749] rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
-                                    placeholder="Write your thoughts..."
-                                    rows={4}
-                                    value={reviewText}
-                                    onChange={(e) => setReviewText(e.target.value)}
-                                />
-
-                                <div className="flex items-center justify-between">
-                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${isReviewPublic ? 'bg-primary-500' : 'bg-slate-700'}`}>
-                                            <div className={`w-4 h-4 bg-white rounded-full transition-transform ${isReviewPublic ? 'translate-x-4' : ''}`} />
-                                            <input
-                                                type="checkbox"
-                                                className="hidden"
-                                                checked={isReviewPublic}
-                                                onChange={(e) => setIsReviewPublic(e.target.checked)}
-                                            />
-                                        </div>
-                                        <span className={`text-sm ${isReviewPublic ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`}>
-                                            Public Review
-                                        </span>
-                                    </label>
-
-                                    <button
-                                        onClick={handleSaveReview}
-                                        disabled={isSavingReview}
-                                        className="btn-primary px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                    >
-                                        {isSavingReview && <Loader2 className="w-4 h-4 animate-spin" />}
-                                        {isSavingReview ? 'Saving...' : 'Save Review'}
-                                    </button>
+                        {/* Description */}
+                        {plainDescription && (
+                            <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 sm:p-8 shadow-glass">
+                                <h2 className="text-xl font-display font-bold text-white mb-4">
+                                    About This Book
+                                </h2>
+                                <div className="text-white/60 font-serif leading-relaxed whitespace-pre-line">
+                                    {plainDescription}
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Buying Options - Collapsible */}
-                    <details className="group" open>
-                        <summary className="cursor-pointer list-none">
-                            <div className="flex items-center justify-between bg-gradient-to-r from-success-500/10 to-emerald-500/5 border border-success-500/30 rounded-2xl p-4 hover:border-success-500/50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <span className="p-2 rounded-xl bg-success-500/20 border border-success-500/30">
-                                        <ShoppingCart className="w-5 h-5 text-success-400" />
-                                    </span>
-                                    <div>
-                                        <h2 className="text-lg font-bold text-white">Where to Buy</h2>
-                                        <p className="text-xs text-slate-400">Check availability & prices</p>
+                        {/* Community Reviews */}
+                        {reviews.length > 0 && (
+                            <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 sm:p-8 shadow-glass">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-display font-bold text-white">
+                                        Community Reviews
+                                    </h2>
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 rounded-full border border-white/[0.06]">
+                                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                        <span className="text-sm font-semibold text-white">
+                                            {averageRating.toFixed(1)}
+                                        </span>
+                                        <span className="text-xs text-white/40">
+                                            ({reviews.length})
+                                        </span>
                                     </div>
                                 </div>
-                                <div className="text-slate-400 group-open:rotate-180 transition-transform">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+
+                                <div className="space-y-5">
+                                    {reviews.slice(0, 5).map((review) => (
+                                        <div
+                                            key={review.id}
+                                            className="pb-5 border-b border-white/[0.06] last:border-0 last:pb-0"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                {/* Avatar */}
+                                                <div className="flex-shrink-0">
+                                                    {review.profiles?.avatar_url ? (
+                                                        <Image
+                                                            src={review.profiles.avatar_url}
+                                                            alt={review.profiles.full_name || 'Reader'}
+                                                            width={40}
+                                                            height={40}
+                                                            className="rounded-full object-cover ring-2 ring-white/[0.06]"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-500/10 flex items-center justify-center ring-2 ring-white/[0.06]">
+                                                            <span className="text-sm font-bold text-amber-400">
+                                                                {(review.profiles?.full_name || 'A')[0].toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-semibold text-white text-sm">
+                                                            {review.profiles?.full_name || 'Anonymous Reader'}
+                                                        </span>
+                                                        <span className="text-xs text-white/30">
+                                                            {new Date(review.updated_at).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Stars */}
+                                                    <div className="flex items-center gap-0.5 mb-2">
+                                                        {Array.from({ length: 5 }).map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                className={`w-3.5 h-3.5 ${
+                                                                    i < Math.round(review.rating)
+                                                                        ? 'text-amber-400 fill-amber-400'
+                                                                        : 'text-white/20'
+                                                                }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    {review.review && (
+                                                        <p className="text-white/50 text-sm font-serif leading-relaxed">
+                                                            &ldquo;{review.review}&rdquo;
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </summary>
-                        <div className="mt-4">
-                            <PriceTable prices={book.prices || []} />
+                        )}
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="lg:col-span-1 space-y-6">
+                        {/* Clubs Reading This */}
+                        {clubs.length > 0 && (
+                            <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 shadow-glass">
+                                <h3 className="text-lg font-display font-bold text-white mb-4 flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-amber-400" />
+                                    Clubs Reading This
+                                </h3>
+                                <div className="space-y-3">
+                                    {clubs.map((club) => (
+                                        <Link
+                                            key={club.id}
+                                            href={`/clubs/${club.id}`}
+                                            className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] transition-all group"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                                                <BookOpen className="w-5 h-5 text-amber-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-semibold text-white truncate group-hover:text-amber-400 transition-colors">
+                                                    {club.name}
+                                                </div>
+                                                <div className="text-xs text-white/40">
+                                                    {club.member_count} {club.member_count === 1 ? 'member' : 'members'}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Related Books */}
+                        {relatedBooks.length > 0 && (
+                            <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6 shadow-glass">
+                                <h3 className="text-lg font-display font-bold text-white mb-4">
+                                    You Might Also Like
+                                </h3>
+                                <div className="space-y-4">
+                                    {relatedBooks.map((related) => (
+                                        <Link
+                                            key={related.id}
+                                            href={`/book/${related.id}`}
+                                            className="flex gap-3 group"
+                                        >
+                                            <div className="relative w-12 h-[72px] rounded-lg overflow-hidden flex-shrink-0 shadow-book ring-1 ring-white/[0.06]">
+                                                {related.coverUrl ? (
+                                                    <Image
+                                                        src={related.coverUrl}
+                                                        alt={related.title}
+                                                        fill
+                                                        sizes="48px"
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-white/[0.04] flex items-center justify-center">
+                                                        <BookOpen className="w-5 h-5 text-white/30" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0 py-0.5">
+                                                <div className="text-sm font-semibold text-white/80 line-clamp-2 group-hover:text-amber-400 transition-colors leading-snug">
+                                                    {related.title}
+                                                </div>
+                                                <div className="text-xs text-white/40 mt-0.5 truncate">
+                                                    {related.authors.join(', ') || 'Unknown'}
+                                                </div>
+                                                {related.rating && (
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                                                        <span className="text-xs text-white/50">{related.rating.toFixed(1)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quick Info Card */}
+                        <div className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/[0.06] p-6">
+                            <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider mb-4">
+                                Book Details
+                            </h3>
+                            <dl className="space-y-3 text-sm">
+                                {book.publisher && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/40">Publisher</dt>
+                                        <dd className="text-white/80 font-medium text-right">{book.publisher}</dd>
+                                    </div>
+                                )}
+                                {book.publishedDate && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/40">Published</dt>
+                                        <dd className="text-white/80 font-medium">{book.publishedDate}</dd>
+                                    </div>
+                                )}
+                                {book.pageCount && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/40">Pages</dt>
+                                        <dd className="text-white/80 font-medium">{book.pageCount}</dd>
+                                    </div>
+                                )}
+                                {book.isbn && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/40">ISBN</dt>
+                                        <dd className="text-white/80 font-medium font-mono text-xs">{book.isbn}</dd>
+                                    </div>
+                                )}
+                                {book.language && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-white/40">Language</dt>
+                                        <dd className="text-white/80 font-medium uppercase">{book.language}</dd>
+                                    </div>
+                                )}
+                            </dl>
+
+                            {book.previewLink && (
+                                <a
+                                    href={book.previewLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-5 w-full btn-secondary text-sm py-2.5 flex items-center justify-center gap-2"
+                                >
+                                    <BookOpen className="w-4 h-4" />
+                                    Preview on Google Books
+                                </a>
+                            )}
                         </div>
-                    </details>
-
-
+                    </div>
                 </div>
             </div>
         </div>
