@@ -1,6 +1,6 @@
 
 -- 1. Profiles Table (Extends Auth Users)
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid references auth.users not null primary key,
   full_name text,
   avatar_url text,
@@ -15,7 +15,7 @@ create table public.profiles (
 );
 
 -- 2. User Books / Library Table
-create table public.user_books (
+create table if not exists public.user_books (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   book_id text not null, -- Google Books ID or ISBN
