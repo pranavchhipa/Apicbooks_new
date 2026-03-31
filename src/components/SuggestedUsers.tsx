@@ -113,7 +113,7 @@ export default function SuggestedUsers({ currentUserId }: { currentUserId: strin
 
     return (
         <div className="space-y-4">
-            <h3 className="text-white font-semibold flex items-center gap-2">
+            <h3 className="text-foreground font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent-400" />
                 <span>Recommended for You</span>
             </h3>
@@ -124,7 +124,7 @@ export default function SuggestedUsers({ currentUserId }: { currentUserId: strin
                     const levelInfo = LEVELS[levelKey];
 
                     return (
-                        <div key={user.id} className="flex items-center gap-4 p-4 bg-[#141b3d]/60 border border-[#1e2749] rounded-xl hover:border-accent-500/30 transition-all group">
+                        <div key={user.id} className="flex items-center gap-4 p-4 bg-[#141b3d]/60 border border-card-border rounded-xl hover:border-accent-500/30 transition-all group">
                             {/* Avatar */}
                             <Link href={`/profile/${user.id}`} className="relative">
                                 {user.avatar_url ? (
@@ -150,10 +150,10 @@ export default function SuggestedUsers({ currentUserId }: { currentUserId: strin
                             {/* Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <Link href={`/profile/${user.id}`} className="font-bold text-white hover:underline truncate">
+                                    <Link href={`/profile/${user.id}`} className="font-bold text-foreground hover:underline truncate">
                                         {user.full_name}
                                     </Link>
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#1e2749] text-slate-300 border border-slate-700">
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated text-foreground/80 border border-slate-700">
                                         {levelInfo.label}
                                     </span>
                                 </div>
@@ -165,7 +165,7 @@ export default function SuggestedUsers({ currentUserId }: { currentUserId: strin
                                         </span>
                                     )}
                                     {user.favorite_genres?.slice(0, 2).map(g => (
-                                        <span key={g} className="text-[10px] text-slate-400">
+                                        <span key={g} className="text-[10px] text-muted-foreground">
                                             {g}
                                         </span>
                                     ))}
@@ -179,7 +179,7 @@ export default function SuggestedUsers({ currentUserId }: { currentUserId: strin
                                 className={`
                                     px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all
                                     ${followingIds.includes(user.id)
-                                        ? 'bg-slate-700/50 text-slate-400 cursor-default'
+                                        ? 'bg-slate-700/50 text-muted-foreground cursor-default'
                                         : 'bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20'
                                     }
                                 `}

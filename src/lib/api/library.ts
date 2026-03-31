@@ -14,12 +14,17 @@ export interface LibraryItem {
     finished_at?: string;
     current_page?: number;
     total_minutes_read?: number;
+    series_name?: string | null;
+    series_order?: number | null;
     book: {
         id: string;
         title: string;
         authors: string[];
         cover_url: string;
         page_count?: number;
+        series_name?: string | null;
+        series_order?: number | null;
+        global_book_metadata?: any;
     }
 }
 
@@ -36,7 +41,7 @@ export interface ReadingSession {
 }
 
 // 1. Ensure book exists in our DB cache
-async function ensureBookExists(googleId: string): Promise<string | null> {
+export async function ensureBookExists(googleId: string): Promise<string | null> {
     const supabase = createClient();
 
     // Check if exists
@@ -64,7 +69,9 @@ async function ensureBookExists(googleId: string): Promise<string | null> {
             cover_url: bookData.coverUrl,
             categories: bookData.categories || [],
             page_count: bookData.pageCount,
-            published_date: bookData.publishedDate
+            published_date: bookData.publishedDate,
+            series_name: bookData.seriesName || null,
+            series_order: bookData.seriesOrder || null
         })
         .select('id')
         .single();
@@ -162,7 +169,7 @@ export async function getUserLibrary(userId: string, status?: ReadingStatus) {
         .from('user_library')
         .select(`
             *,
-            book:books (id, title, authors, cover_url, page_count)
+            book:books (id, title, authors, cover_url, page_count, series_name, series_order, global_book_metadata(series_name, series_order))
         `)
         .eq('user_id', userId);
 
@@ -275,6 +282,24 @@ export async function updateLibraryProgress(userId: string, bookId: string, page
         .update(updateData)
         .eq('user_id', userId)
         .eq('book_id', bookId)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+}
+
+export async function updateBookStartedDate(userId: string, libraryId: string, date: string) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+        .from('user_library')
+        .update({
+            started_at: date,
+            updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('id', libraryId)
         .select()
         .single();
 
@@ -411,6 +436,7 @@ export async function getWeeklyReadingStats(userId: string): Promise<{
     totalMinutes: number;
     totalPages: number;
     dailyStats: { date: string; minutes: number; pages: number }[];
+    moodCounts: Record<string, number>;
 }> {
     const supabase = createClient();
 
@@ -419,17 +445,18 @@ export async function getWeeklyReadingStats(userId: string): Promise<{
 
     const { data, error } = await supabase
         .from('reading_sessions')
-        .select('started_at, duration_minutes, pages_read')
+        .select('started_at, duration_minutes, pages_read, notes')
         .eq('user_id', userId)
         .not('ended_at', 'is', null)
         .gte('started_at', sevenDaysAgo.toISOString());
 
     if (error || !data) {
-        return { totalMinutes: 0, totalPages: 0, dailyStats: [] };
+        return { totalMinutes: 0, totalPages: 0, dailyStats: [], moodCounts: {} };
     }
 
     // Aggregate by day
     const dailyMap = new Map<string, { minutes: number; pages: number }>();
+    const moodCounts: Record<string, number> = {};
 
     // Initialize last 7 days
     for (let i = 0; i < 7; i++) {
@@ -457,6 +484,15 @@ export async function getWeeklyReadingStats(userId: string): Promise<{
 
         totalMinutes += mins;
         totalPages += pages;
+
+        // Aggregate Moods (stored in notes)
+        if (session.notes) {
+            // Check if note matches one of our known moods
+            const knownMoods = ['Focused', 'Relaxed', 'Reflective', 'Sleepy', 'Excited', 'Bored'];
+            if (knownMoods.includes(session.notes)) {
+                moodCounts[session.notes] = (moodCounts[session.notes] || 0) + 1;
+            }
+        }
     }
 
     // Convert to array, sorted oldest to newest
@@ -464,7 +500,7 @@ export async function getWeeklyReadingStats(userId: string): Promise<{
         .map(([date, stats]) => ({ date, ...stats }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-    return { totalMinutes, totalPages, dailyStats };
+    return { totalMinutes, totalPages, dailyStats, moodCounts };
 }
 
 /**
@@ -511,8 +547,8 @@ export async function getLibraryItemById(libraryId: string): Promise<LibraryItem
     return data;
 }
 
-export async function updateReview(userId: string, bookId: string, rating: number, review: string, isPublic: boolean = true) {
-    console.log('[updateReview] Starting review update:', { userId, bookId, rating, isPublic });
+export async function updateReview(userId: string, bookId: string, rating: number, review: string, isPublic: boolean = true, dislikeReasons: string[] = []) {
+    console.log('[updateReview] Starting review update:', { userId, bookId, rating, isPublic, dislikeReasons });
     const supabase = createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -538,6 +574,7 @@ export async function updateReview(userId: string, bookId: string, rating: numbe
             rating: rating,
             review: review,
             is_review_public: isPublic,
+            dislike_reasons: dislikeReasons,
             updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
@@ -569,11 +606,36 @@ export async function updateReview(userId: string, bookId: string, rating: numbe
             book_cover: book?.cover_url,
             metadata: {
                 rating: rating,
-                review_snippet: review ? review.substring(0, 100) : undefined
+                review_snippet: review ? review.substring(0, 100) : undefined,
+                dislike_reasons: dislikeReasons.length > 0 ? dislikeReasons : undefined
             }
         });
     }
 
     return data;
+}
+
+/**
+ * Get user's top rated books (4 stars and above)
+ */
+export async function getTopRatedBooks(userId: string, limit: number = 5) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+        .from('user_library')
+        .select(`
+            *,
+            book:books (id, title, authors, cover_url, page_count, series_name, series_order, global_book_metadata(series_name, series_order))
+        `)
+        .eq('user_id', userId)
+        .gte('rating', 4)
+        .order('updated_at', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching top rated books:', error);
+        return [];
+    }
+    return data || [];
 }
 

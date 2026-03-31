@@ -10,10 +10,13 @@ import {
     endReadingSession,
     getActiveSession,
     updateLibraryProgress,
+
     ensureBookStarted,
+    updateBookStartedDate,
     type ReadingSession
 } from '@/lib/api/library';
 import { toast } from 'sonner';
+import NotesQuotesPanel from '@/components/books/NotesQuotesPanel';
 
 // Local storage key for timer state
 const TIMER_STATE_KEY = 'apicbooks_active_timer';
@@ -41,6 +44,7 @@ export default function CurrentlyReading() {
     const [showBookSelector, setShowBookSelector] = useState(false);
     const [sessionNotes, setSessionNotes] = useState('');
     const [reviewBook, setReviewBook] = useState<{ bookId: string, title: string, libraryId: string } | null>(null);
+    const [isEditingDate, setIsEditingDate] = useState(false);
 
     const supabase = createClient();
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -310,47 +314,47 @@ export default function CurrentlyReading() {
 
     if (loading) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl overflow-hidden p-6 md:p-8 animate-pulse">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl overflow-hidden p-6 md:p-8 animate-pulse">
                 {/* Header Skeleton */}
-                <div className="flex items-center justify-between mb-8 border-b border-[#1e2749]/50 pb-4">
-                    <div className="h-6 w-40 bg-[#1e2749] rounded-lg" />
-                    <div className="h-8 w-32 bg-[#1e2749] rounded-lg" />
+                <div className="flex items-center justify-between mb-8 border-b border-card-border/50 pb-4">
+                    <div className="h-6 w-40 bg-card-border rounded-lg" />
+                    <div className="h-8 w-32 bg-card-border rounded-lg" />
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Book Cover Skeleton */}
                     <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-32 h-48 bg-[#1e2749] rounded-lg shadow-xl" />
+                        <div className="w-32 h-48 bg-card-border rounded-lg shadow-xl" />
                     </div>
 
                     {/* Content Skeleton */}
                     <div className="flex-1 space-y-6">
                         {/* Title & Author */}
                         <div className="space-y-3">
-                            <div className="h-8 w-3/4 bg-[#1e2749] rounded-lg" />
-                            <div className="h-5 w-1/3 bg-[#1e2749] rounded-lg" />
+                            <div className="h-8 w-3/4 bg-card-border rounded-lg" />
+                            <div className="h-5 w-1/3 bg-card-border rounded-lg" />
                         </div>
 
                         {/* Progress Bar */}
                         <div className="space-y-2">
                             <div className="flex justify-between">
-                                <div className="h-4 w-20 bg-[#1e2749] rounded" />
-                                <div className="h-4 w-20 bg-[#1e2749] rounded" />
+                                <div className="h-4 w-20 bg-card-border rounded" />
+                                <div className="h-4 w-20 bg-card-border rounded" />
                             </div>
-                            <div className="h-2.5 w-full bg-[#1e2749] rounded-full" />
+                            <div className="h-2.5 w-full bg-card-border rounded-full" />
                         </div>
 
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="h-24 bg-[#1e2749] rounded-xl" />
+                                <div key={i} className="h-24 bg-card-border rounded-xl" />
                             ))}
                         </div>
 
                         {/* Buttons */}
                         <div className="flex gap-4">
-                            <div className="h-12 flex-1 bg-[#1e2749] rounded-xl" />
-                            <div className="h-12 w-32 bg-[#1e2749] rounded-xl" />
+                            <div className="h-12 flex-1 bg-card-border rounded-xl" />
+                            <div className="h-12 w-32 bg-card-border rounded-xl" />
                         </div>
                     </div>
                 </div>
@@ -361,7 +365,7 @@ export default function CurrentlyReading() {
     // Empty State
     if (!selectedBook) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-16">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-16">
                 <div className="max-w-lg mx-auto text-center">
                     <div className="relative inline-block mb-8">
                         <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl blur-2xl opacity-30" />
@@ -369,8 +373,8 @@ export default function CurrentlyReading() {
                             <BookOpen className="w-12 h-12 text-primary-400" />
                         </div>
                     </div>
-                    <h2 className="text-3xl font-bold text-white mb-4">No Active Book</h2>
-                    <p className="text-slate-400 mb-8 text-lg">
+                    <h2 className="text-3xl font-bold text-foreground mb-4">No Active Book</h2>
+                    <p className="text-muted-foreground mb-8 text-lg">
                         Start reading a book to track your progress and see your stats come to life.
                     </p>
                     <Link
@@ -403,47 +407,56 @@ export default function CurrentlyReading() {
 
     return (
         <>
-            <div className="relative bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl overflow-hidden hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10">
-                {/* Header with Book Selector */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e2749]/50">
+            <div className="relative bg-card backdrop-blur-xl border border-card-border rounded-2xl overflow-hidden hover:border-primary-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10">
+                {/* Header with Navigation */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-card-border/50">
                     <div className="flex items-center gap-3">
                         <BookOpen className="w-5 h-5 text-primary-400" />
-                        <h2 className="font-semibold text-white">Currently Reading</h2>
+                        <h2 className="font-semibold text-foreground">Currently Reading</h2>
+                        {books.length > 1 && (
+                            <span className="px-2 py-0.5 rounded-full bg-primary-500/10 text-primary-400 text-xs font-medium border border-primary-500/20">
+                                {books.length} Active
+                            </span>
+                        )}
                     </div>
 
                     {books.length > 1 && (
-                        <div className="relative">
+                        <div className="flex items-center gap-1">
                             <button
-                                onClick={() => !isTimerRunning && setShowBookSelector(!showBookSelector)}
+                                onClick={() => {
+                                    if (isTimerRunning) {
+                                        toast.error('Stop timer to switch books');
+                                        return;
+                                    }
+                                    const currentIndex = books.findIndex(b => b.id === selectedBook?.id);
+                                    const prevIndex = (currentIndex - 1 + books.length) % books.length;
+                                    selectBook(books[prevIndex]);
+                                }}
                                 disabled={isTimerRunning}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${isTimerRunning
-                                    ? 'text-slate-500 cursor-not-allowed'
-                                    : 'text-slate-400 hover:text-white hover:bg-[#1e2749]'
-                                    }`}
+                                className="p-1.5 rounded-lg hover:bg-elevated text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                                title="Previous Book"
                             >
-                                Switch Book <ChevronDown className="w-4 h-4" />
+                                <ChevronDown className="w-5 h-5 rotate-90" />
                             </button>
-
-                            {showBookSelector && (
-                                <div className="absolute right-0 top-full mt-2 w-64 bg-[#1a2341] border border-[#1e2749] rounded-xl shadow-xl z-50 overflow-hidden">
-                                    {books.map(book => (
-                                        <button
-                                            key={book.id}
-                                            onClick={() => selectBook(book)}
-                                            className={`w-full flex items-center gap-3 p-3 hover:bg-[#1e2749] transition-colors ${book.id === selectedBook?.id ? 'bg-primary-500/10' : ''
-                                                }`}
-                                        >
-                                            {book.cover_url && (
-                                                <Image src={book.cover_url} alt="" width={32} height={48} className="rounded object-cover" />
-                                            )}
-                                            <div className="text-left min-w-0">
-                                                <p className="text-sm text-white truncate">{book.title}</p>
-                                                <p className="text-xs text-slate-400">{Math.min(100, Math.round((book.current_page / (book.total_pages || 1)) * 100))}% complete</p>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                            <span className="text-xs text-muted-foreground min-w-[3rem] text-center">
+                                {(books.findIndex(b => b.id === selectedBook?.id) + 1)} / {books.length}
+                            </span>
+                            <button
+                                onClick={() => {
+                                    if (isTimerRunning) {
+                                        toast.error('Stop timer to switch books');
+                                        return;
+                                    }
+                                    const currentIndex = books.findIndex(b => b.id === selectedBook?.id);
+                                    const nextIndex = (currentIndex + 1) % books.length;
+                                    selectBook(books[nextIndex]);
+                                }}
+                                disabled={isTimerRunning}
+                                className="p-1.5 rounded-lg hover:bg-elevated text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                                title="Next Book"
+                            >
+                                <ChevronDown className="w-5 h-5 -rotate-90" />
+                            </button>
                         </div>
                     )}
                 </div>
@@ -470,7 +483,7 @@ export default function CurrentlyReading() {
                                 {/* Progress overlay */}
                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                                     <div className="text-center">
-                                        <span className="text-2xl font-bold text-white">{percentage}%</span>
+                                        <span className="text-2xl font-bold text-foreground">{percentage}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -481,10 +494,10 @@ export default function CurrentlyReading() {
                             {/* Title & Timer */}
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                                 <div>
-                                    <h3 className="text-2xl font-bold text-white leading-tight mb-1">
+                                    <h3 className="text-2xl font-bold text-foreground leading-tight mb-1">
                                         {selectedBook.title}
                                     </h3>
-                                    <p className="text-slate-400">by {selectedBook.author}</p>
+                                    <p className="text-muted-foreground">by {selectedBook.author}</p>
                                 </div>
 
                                 {/* Timer Display */}
@@ -492,10 +505,10 @@ export default function CurrentlyReading() {
                                     flex items-center gap-2 px-4 py-2 rounded-xl border transition-all
                                     ${isTimerRunning
                                         ? 'bg-primary-500/10 border-primary-500/30 shadow-lg shadow-primary-500/20'
-                                        : 'bg-[#1e2749]/50 border-[#1e2749]'}
+                                        : 'bg-elevated/50 border-card-border'}
                                 `}>
-                                    <Clock className={`w-4 h-4 ${isTimerRunning ? 'text-primary-400 animate-pulse' : 'text-slate-400'}`} />
-                                    <span className={`text-xl font-mono font-bold tabular-nums ${isTimerRunning ? 'text-white' : 'text-slate-300'}`}>
+                                    <Clock className={`w-4 h-4 ${isTimerRunning ? 'text-primary-400 animate-pulse' : 'text-muted-foreground'}`} />
+                                    <span className={`text-xl font-mono font-bold tabular-nums ${isTimerRunning ? 'text-foreground' : 'text-foreground/80'}`}>
                                         {formatTime(seconds)}
                                     </span>
                                 </div>
@@ -504,10 +517,10 @@ export default function CurrentlyReading() {
                             {/* Progress Bar */}
                             <div>
                                 <div className="flex justify-between text-sm mb-2">
-                                    <span className="text-slate-400">Page {Math.min(selectedBook.current_page, selectedBook.total_pages)} of {selectedBook.total_pages}</span>
+                                    <span className="text-muted-foreground">Page {Math.min(selectedBook.current_page, selectedBook.total_pages)} of {selectedBook.total_pages}</span>
                                     <span className="text-primary-400 font-medium">{selectedBook.total_pages - selectedBook.current_page} pages left</span>
                                 </div>
-                                <div className="h-2.5 w-full bg-[#0a0e27] rounded-full overflow-hidden border border-[#1e2749]">
+                                <div className="h-2.5 w-full bg-[#0a0e27] rounded-full overflow-hidden border border-card-border">
                                     <div
                                         className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full transition-all duration-500"
                                         style={{ width: `${percentage}%` }}
@@ -517,26 +530,70 @@ export default function CurrentlyReading() {
 
                             {/* Stats Row */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                                <div className="bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl p-3 text-center">
+                                <div className="bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl p-3 text-center">
                                     <Clock className="w-4 h-4 text-primary-400 mx-auto mb-1" />
-                                    <p className="text-lg font-bold text-white">{formatMinutes(selectedBook.total_minutes_read || 0)}</p>
+                                    <p className="text-lg font-bold text-foreground">{formatMinutes(selectedBook.total_minutes_read || 0)}</p>
                                     <p className="text-xs text-slate-500">Time Read</p>
                                 </div>
-                                <div className="bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl p-3 text-center">
+                                <div className="bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl p-3 text-center">
                                     <TrendingUp className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-                                    <p className="text-lg font-bold text-white">{pagesPerDay}</p>
+                                    <p className="text-lg font-bold text-foreground">{pagesPerDay}</p>
                                     <p className="text-xs text-slate-500">Pages/Day</p>
                                 </div>
-                                <div className="bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl p-3 text-center">
+
+                                <div
+                                    className={`
+                                        bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl p-3 text-center
+                                        ${!isEditingDate ? 'cursor-pointer hover:border-amber-400/50 hover:bg-amber-400/5 group/date' : ''}
+                                        transition-all relative
+                                    `}
+                                    onClick={() => !isEditingDate && setIsEditingDate(true)}
+                                    title="Click to edit start date"
+                                >
                                     <Calendar className="w-4 h-4 text-amber-400 mx-auto mb-1" />
-                                    <p className="text-lg font-bold text-white">
-                                        {new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                    </p>
+
+                                    {isEditingDate ? (
+                                        <input
+                                            type="date"
+                                            className="w-full bg-transparent text-sm font-bold text-foreground text-center outline-none border-b border-amber-400"
+                                            value={new Date(startDate).toISOString().split('T')[0]}
+                                            onChange={async (e) => {
+                                                const newDate = e.target.value;
+                                                if (newDate) {
+                                                    try {
+                                                        const { data: { user } } = await supabase.auth.getUser();
+                                                        if (user && selectedBook) {
+                                                            await updateBookStartedDate(user.id, selectedBook.id, new Date(newDate).toISOString());
+                                                            // Update local state
+                                                            setSelectedBook((prev: any) => ({ ...prev, started_at: new Date(newDate).toISOString() }));
+                                                            setBooks(prev => prev.map(b => b.id === selectedBook.id ? { ...b, started_at: new Date(newDate).toISOString() } : b));
+                                                            toast.success('Start date updated');
+                                                        }
+                                                    } catch (error) {
+                                                        toast.error('Failed to update date');
+                                                    }
+                                                }
+                                                setIsEditingDate(false);
+                                            }}
+                                            onBlur={() => setIsEditingDate(false)}
+                                            autoFocus
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        <>
+                                            <p className="text-lg font-bold text-foreground relative z-10">
+                                                {new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </p>
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/date:opacity-10 pointer-events-none">
+                                                <div className="bg-amber-400 w-full h-full rounded-xl" />
+                                            </div>
+                                        </>
+                                    )}
                                     <p className="text-xs text-slate-500">Started</p>
                                 </div>
-                                <div className="bg-[#0a0e27]/50 border border-[#1e2749] rounded-xl p-3 text-center">
+                                <div className="bg-secondary dark:bg-[#0c0a14]/50 border border-card-border rounded-xl p-3 text-center">
                                     <Target className="w-4 h-4 text-rose-400 mx-auto mb-1" />
-                                    <p className="text-lg font-bold text-white">
+                                    <p className="text-lg font-bold text-foreground">
                                         {estimatedDaysLeft ? `${estimatedDaysLeft}d` : '—'}
                                     </p>
                                     <p className="text-xs text-slate-500">Est. Finish</p>
@@ -565,7 +622,7 @@ export default function CurrentlyReading() {
 
                                 <button
                                     onClick={() => setShowEndModal(true)}
-                                    className="flex items-center gap-2 px-4 py-3 border border-[#1e2749] hover:bg-[#1e2749] rounded-xl text-slate-300 transition-all"
+                                    className="flex items-center gap-2 px-4 py-3 border border-card-border hover:bg-card-border rounded-xl text-foreground/80 transition-all"
                                 >
                                     <BookOpen className="w-4 h-4" />
                                     Update Page
@@ -574,98 +631,150 @@ export default function CurrentlyReading() {
                         </div>
                     </div>
                 </div>
-            </div>
+
+                {/* Notes & Quotes Section */}
+                {selectedBook && (
+                    <div className="mt-4">
+                        <NotesQuotesPanel
+                            libraryId={selectedBook.id}
+                            bookTitle={selectedBook.title}
+                            currentPage={selectedBook.current_page}
+                        />
+                    </div>
+                )}
+            </div >
 
             {/* End Session Modal */}
-            {showEndModal && (
-                <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-start justify-center p-4 pt-24 overflow-y-auto">
-                    <div className="bg-[#141b3d] border border-[#1e2749] rounded-2xl w-full max-w-md shadow-2xl relative mb-12">
-                        <div className="flex items-center justify-between p-6 border-b border-[#1e2749]">
-                            <h3 className="text-lg font-bold text-white">
-                                {isTimerRunning ? 'End Reading Session' : 'Update Progress'}
-                            </h3>
-                            <button
-                                onClick={() => setShowEndModal(false)}
-                                className="p-2 hover:bg-[#1e2749] rounded-lg transition-colors"
-                            >
-                                <X className="w-5 h-5 text-slate-400" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            {isTimerRunning && (
-                                <div className="text-center p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
-                                    <p className="text-sm text-slate-400 mb-1">Session Duration</p>
-                                    <p className="text-3xl font-mono font-bold text-white">{formatTime(seconds)}</p>
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm text-slate-400 mb-2">
-                                    Current Page (out of {selectedBook.total_pages})
-                                </label>
-                                <input
-                                    type="number"
-                                    value={newPage}
-                                    onChange={(e) => setNewPage(e.target.value)}
-                                    placeholder={selectedBook.current_page.toString()}
-                                    min={0}
-                                    max={selectedBook.total_pages}
-                                    className="w-full px-4 py-3 bg-[#0a0e27] border border-[#1e2749] rounded-xl text-white focus:border-primary-500 outline-none transition-colors"
-                                />
+            {
+                showEndModal && (
+                    <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-start justify-center p-4 pt-24 overflow-y-auto">
+                        <div className="bg-card border border-card-border rounded-2xl w-full max-w-md shadow-2xl relative mb-12">
+                            <div className="flex items-center justify-between p-6 border-b border-card-border">
+                                <h3 className="text-lg font-bold text-foreground">
+                                    {isTimerRunning ? 'End Reading Session' : 'Update Progress'}
+                                </h3>
+                                <button
+                                    onClick={() => setShowEndModal(false)}
+                                    className="p-2 hover:bg-card-border rounded-lg transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-muted-foreground" />
+                                </button>
                             </div>
 
-                            {isTimerRunning && (
+                            <div className="p-6 space-y-4">
+                                {isTimerRunning && (
+                                    <div className="text-center p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+                                        <p className="text-sm text-muted-foreground mb-1">Session Duration</p>
+                                        <p className="text-3xl font-mono font-bold text-foreground">{formatTime(seconds)}</p>
+                                    </div>
+                                )}
+
                                 <div>
-                                    <label className="block text-sm text-slate-400 mb-2">Notes (optional)</label>
-                                    <textarea
-                                        value={sessionNotes}
-                                        onChange={(e) => setSessionNotes(e.target.value)}
-                                        placeholder="Any thoughts about this reading session..."
-                                        rows={3}
-                                        className="w-full px-4 py-3 bg-[#0a0e27] border border-[#1e2749] rounded-xl text-white placeholder:text-slate-600 focus:border-primary-500 outline-none transition-colors resize-none"
+                                    <label className="block text-sm text-muted-foreground mb-2">
+                                        Current Page (out of {selectedBook.total_pages})
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={newPage}
+                                        onChange={(e) => setNewPage(e.target.value)}
+                                        placeholder={selectedBook.current_page.toString()}
+                                        min={0}
+                                        max={selectedBook.total_pages}
+                                        className="w-full px-4 py-3 bg-secondary dark:bg-[#0c0a14] border border-card-border rounded-xl text-foreground focus:border-primary-500 outline-none transition-colors"
                                     />
                                 </div>
-                            )}
-                        </div>
 
-                        <div className="flex gap-3 p-6 border-t border-[#1e2749]">
-                            {isTimerRunning && (
+                                {isTimerRunning && (
+                                    <div className="mt-4">
+                                        <label className="block text-xs font-medium text-muted-foreground mb-2 text-center">Session Vibe</label>
+                                        <div className="flex justify-center gap-3">
+                                            {[
+                                                { emoji: '🔥', label: 'Focused' },
+                                                { emoji: '😊', label: 'Relaxed' },
+                                                { emoji: '🤔', label: 'Reflective' },
+                                                { emoji: '😴', label: 'Sleepy' },
+                                            ].map(mood => (
+                                                <button
+                                                    key={mood.label}
+                                                    type="button"
+                                                    onClick={() => setSessionNotes(sessionNotes === mood.label ? '' : mood.label)}
+                                                    className={`
+                                                    relative group w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all
+                                                    ${sessionNotes === mood.label
+                                                            ? 'bg-primary-500 text-white scale-110 shadow-lg shadow-primary-500/25'
+                                                            : 'bg-secondary dark:bg-[#1a1528] text-slate-400 hover:bg-elevated hover:scale-105'}
+                                                `}
+                                                    title={mood.label}
+                                                >
+                                                    {mood.emoji}
+                                                    {/* Tooltip label */}
+                                                    <span className={`
+                                                    absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity font-medium
+                                                    ${sessionNotes === mood.label ? 'text-primary-400 opacity-100' : 'text-slate-500'}
+                                                `}>
+                                                        {mood.label}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {/* Spacer for labels */}
+                                        <div className="h-4" />
+                                    </div>
+                                )}
+
+                                {/* Notes & Quotes — with their own page numbers */}
+                                {selectedBook && (
+                                    <div className="border-t border-card-border pt-4">
+                                        <NotesQuotesPanel
+                                            libraryId={selectedBook.id}
+                                            bookTitle={selectedBook.title}
+                                            currentPage={parseInt(newPage.toString()) || selectedBook.current_page}
+                                            compact={true}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3 p-6 border-t border-card-border">
+                                {isTimerRunning && (
+                                    <button
+                                        onClick={handleDiscardSession}
+                                        className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        Discard
+                                    </button>
+                                )}
                                 <button
-                                    onClick={handleDiscardSession}
-                                    className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                                    onClick={() => setShowEndModal(false)}
+                                    className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors ml-auto"
                                 >
-                                    Discard
+                                    Cancel
                                 </button>
-                            )}
-                            <button
-                                onClick={() => setShowEndModal(false)}
-                                className="px-4 py-2 text-slate-400 hover:text-white transition-colors ml-auto"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveSession}
-                                disabled={isSaving}
-                                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
-                            >
-                                <Save className="w-4 h-4" />
-                                {isSaving ? 'Saving...' : 'Save Progress'}
-                            </button>
+                                <button
+                                    onClick={handleSaveSession}
+                                    disabled={isSaving}
+                                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
+                                >
+                                    <Save className="w-4 h-4" />
+                                    {isSaving ? 'Saving...' : 'Save Progress'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {reviewBook && (
-                <ReviewModal
-                    isOpen={true}
-                    onClose={() => handleReviewComplete()}
-                    bookId={reviewBook.bookId}
-                    bookTitle={reviewBook.title}
-                    onReviewSubmitted={() => handleReviewComplete()}
-                />
-            )}
+            {
+                reviewBook && (
+                    <ReviewModal
+                        isOpen={true}
+                        onClose={() => handleReviewComplete()}
+                        bookId={reviewBook.bookId}
+                        bookTitle={reviewBook.title}
+                        onReviewSubmitted={() => handleReviewComplete()}
+                    />
+                )
+            }
         </>
     );
 }

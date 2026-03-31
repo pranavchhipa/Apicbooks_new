@@ -34,15 +34,15 @@ export default function ReadingGoalProgress({
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-card-border rounded-2xl p-6">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
                     <Target className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold text-white">{year} Reading Goal</h3>
-                    <p className="text-xs text-slate-400">
+                    <h3 className="text-lg font-semibold text-foreground">{year} Reading Goal</h3>
+                    <p className="text-xs text-muted-foreground">
                         {isComplete ? '🎉 Goal achieved!' : `${remaining} books to go`}
                     </p>
                 </div>
@@ -92,10 +92,10 @@ export default function ReadingGoalProgress({
                             <Trophy className={`text-emerald-400 ${size === 'sm' ? 'w-6 h-6' : size === 'md' ? 'w-8 h-8' : 'w-10 h-10'}`} />
                         ) : (
                             <>
-                                <span className={`font-bold text-white ${config.text}`}>
+                                <span className={`font-bold text-foreground ${config.text}`}>
                                     {Math.round(percentage)}%
                                 </span>
-                                <span className={`text-slate-400 ${config.subtext}`}>
+                                <span className={`text-muted-foreground ${config.subtext}`}>
                                     {booksRead}/{goalBooks}
                                 </span>
                             </>
@@ -108,18 +108,18 @@ export default function ReadingGoalProgress({
             <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-[#0a0e27]/50 rounded-xl p-3">
                     <BookOpen className="w-4 h-4 mx-auto text-primary-400 mb-1" />
-                    <p className="text-lg font-bold text-white">{booksRead}</p>
-                    <p className="text-[10px] text-slate-400 uppercase">Read</p>
+                    <p className="text-lg font-bold text-foreground">{booksRead}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Read</p>
                 </div>
                 <div className="bg-[#0a0e27]/50 rounded-xl p-3">
                     <Target className="w-4 h-4 mx-auto text-emerald-400 mb-1" />
-                    <p className="text-lg font-bold text-white">{goalBooks}</p>
-                    <p className="text-[10px] text-slate-400 uppercase">Goal</p>
+                    <p className="text-lg font-bold text-foreground">{goalBooks}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Goal</p>
                 </div>
                 <div className="bg-[#0a0e27]/50 rounded-xl p-3">
                     <TrendingUp className="w-4 h-4 mx-auto text-amber-400 mb-1" />
-                    <p className="text-lg font-bold text-white">{remaining}</p>
-                    <p className="text-[10px] text-slate-400 uppercase">To Go</p>
+                    <p className="text-lg font-bold text-foreground">{remaining}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">To Go</p>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@ export function ReadingGoalCompact({ booksRead, goalBooks }: { booksRead: number
     const percentage = goalBooks > 0 ? Math.min((booksRead / goalBooks) * 100, 100) : 0;
 
     return (
-        <div className="flex items-center gap-3 bg-[#1e2749]/50 rounded-xl p-3">
+        <div className="flex items-center gap-3 bg-elevated/50 rounded-xl p-3">
             <div className="relative w-10 h-10">
                 <svg className="transform -rotate-90" width={40} height={40}>
                     <circle
@@ -158,8 +158,8 @@ export function ReadingGoalCompact({ booksRead, goalBooks }: { booksRead: number
                 <Target className="absolute inset-0 m-auto w-4 h-4 text-primary-400" />
             </div>
             <div>
-                <p className="text-sm font-medium text-white">{booksRead} of {goalBooks} books</p>
-                <p className="text-xs text-slate-400">{Math.round(percentage)}% complete</p>
+                <p className="text-sm font-medium text-foreground">{booksRead} of {goalBooks} books</p>
+                <p className="text-xs text-muted-foreground">{Math.round(percentage)}% complete</p>
             </div>
         </div>
     );

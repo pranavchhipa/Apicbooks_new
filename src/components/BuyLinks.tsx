@@ -95,7 +95,7 @@ export default function BuyLinks({ isbn, title, author }: BuyLinksProps) {
             </div>
 
             {/* Info Note */}
-            <div className="flex items-start gap-3 p-4 bg-[#0a0e27]/50 rounded-xl border border-[#1e2749]">
+            <div className="flex items-start gap-3 p-4 bg-[#0a0e27]/50 rounded-xl border border-card-border">
                 <span className="text-xl">💡</span>
                 <div>
                     <p className="text-sm text-slate-300">

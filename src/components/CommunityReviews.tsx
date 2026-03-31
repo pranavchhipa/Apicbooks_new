@@ -108,7 +108,7 @@ export default function CommunityReviews({ bookId, currentUserId }: CommunityRev
 
     if (loading) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
                 <div className="animate-pulse space-y-4">
                     <div className="h-6 bg-slate-700 rounded w-1/3" />
                     <div className="h-20 bg-slate-700/50 rounded" />
@@ -120,7 +120,7 @@ export default function CommunityReviews({ bookId, currentUserId }: CommunityRev
 
     if (reviews.length === 0) {
         return (
-            <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+            <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-xl bg-amber-500/20 border border-amber-500/30">
                         <MessageSquare className="w-5 h-5 text-amber-400" />
@@ -136,7 +136,7 @@ export default function CommunityReviews({ bookId, currentUserId }: CommunityRev
     }
 
     return (
-        <div className="bg-[#141b3d]/60 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6">
+        <div className="bg-card backdrop-blur-xl border border-card-border rounded-2xl p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function CommunityReviews({ bookId, currentUserId }: CommunityRev
                 </div>
 
                 {/* Average Rating */}
-                <div className="flex items-center gap-2 px-4 py-2 bg-[#0a0e27]/50 rounded-xl border border-[#1e2749]">
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#0a0e27]/50 rounded-xl border border-card-border">
                     <StarRating rating={averageRating} readonly size="sm" />
                     <span className="text-white font-bold">{averageRating.toFixed(1)}</span>
                     <span className="text-xs text-slate-400">({reviews.length})</span>
@@ -166,7 +166,7 @@ export default function CommunityReviews({ bookId, currentUserId }: CommunityRev
                 {displayedReviews.map((review) => (
                     <div
                         key={review.id}
-                        className="bg-[#0a0e27]/30 border border-[#1e2749]/50 rounded-xl p-4 hover:border-[#1e2749] transition-colors"
+                        className="bg-[#0a0e27]/30 border border-card-border/50 rounded-xl p-4 hover:border-card-border transition-colors"
                     >
                         <div className="flex items-start gap-3">
                             {/* Avatar */}

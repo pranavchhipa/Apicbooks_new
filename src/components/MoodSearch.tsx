@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles, Loader2, ArrowRight, Book, Search } from 'lucide-react';
-import { searchBooks, GoogleBook } from '@/lib/api/google-books';
+import { GoogleBook } from '@/lib/api/google-books';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 

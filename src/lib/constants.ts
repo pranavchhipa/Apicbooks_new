@@ -10,3 +10,5 @@ export const DEFAULT_PREFERENCES = {
     region: 'IN',
     currency: 'INR'
 };
+
+export const ADMIN_EMAILS = ['bhatiakshita2112@gmail.com'];

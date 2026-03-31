@@ -162,15 +162,15 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
         const userName = activity.profiles?.full_name || 'Someone';
         switch (activity.type) {
             case 'started_reading':
-                return <><span className="font-medium text-white">{userName}</span> started reading</>;
+                return <><span className="font-medium text-foreground dark:text-white">{userName}</span> started reading</>;
             case 'finished':
-                return <><span className="font-medium text-white">{userName}</span> finished</>;
+                return <><span className="font-medium text-foreground dark:text-white">{userName}</span> finished</>;
             case 'reviewed':
-                return <><span className="font-medium text-white">{userName}</span> reviewed</>;
+                return <><span className="font-medium text-foreground dark:text-white">{userName}</span> reviewed</>;
             case 'added_to_library':
-                return <><span className="font-medium text-white">{userName}</span> added to library</>;
+                return <><span className="font-medium text-foreground dark:text-white">{userName}</span> added to library</>;
             default:
-                return <><span className="font-medium text-white">{userName}</span> updated</>;
+                return <><span className="font-medium text-foreground dark:text-white">{userName}</span> updated</>;
         }
     };
 
@@ -207,9 +207,9 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
 
     if (activities.length === 0) {
         return (
-            <div className="text-center py-12 bg-[#141b3d]/60 border border-[#1e2749] rounded-2xl">
-                <Clock className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">No Activity Yet</h3>
+            <div className="text-center py-12 bg-slate-50 dark:bg-[#141b3d]/60 border border-slate-200 dark:border-card-border rounded-2xl">
+                <Clock className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2">No Activity Yet</h3>
                 <p className="text-slate-500 text-sm">
                     {userId ? "This user hasn't posted any activity yet." : "Start reading or follow friends to see activity here!"}
                 </p>
@@ -221,10 +221,10 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
         <div>
             {showHeader && (
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-primary-500/20 border border-primary-500/30">
-                        <Clock className="w-5 h-5 text-primary-400" />
+                    <div className="p-2 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 border border-primary-500/20 dark:border-primary-500/30">
+                        <Clock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
+                    <h3 className="text-lg font-semibold text-foreground dark:text-white">Recent Activity</h3>
                 </div>
             )}
 
@@ -234,7 +234,7 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
                         key={activity.id}
                         className={`flex gap-3 p-4 border rounded-xl transition-colors ${activity.type === 'system_event'
                             ? 'bg-accent-500/5 border-accent-500/20 hover:border-accent-500/40'
-                            : 'bg-[#141b3d]/60 border-[#1e2749] hover:border-[#2a3459]'
+                            : 'bg-white dark:bg-[#141b3d]/60 border-slate-200 dark:border-card-border hover:border-primary-200 dark:hover:border-[#2a3459]'
                             }`}
                     >
                         {/* Avatar */}
@@ -267,7 +267,7 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
 
                             {/* System Event Text */}
                             {activity.type === 'system_event' ? (
-                                <div className="mt-1 mb-2 text-white">
+                                <div className="mt-1 mb-2 text-foreground dark:text-white">
                                     <span className="font-bold italic">"{activity.book_title}"</span> {activity.metadata?.description}
                                 </div>
                             ) : null}
@@ -287,7 +287,7 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
                                             className="rounded shadow-lg group-hover:scale-105 transition-transform"
                                         />
                                     )}
-                                    <span className={`font-medium group-hover:text-primary-400 transition-colors line-clamp-1 ${activity.type === 'system_event' ? 'text-accent-300' : 'text-white'
+                                    <span className={`font-medium group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors line-clamp-1 ${activity.type === 'system_event' ? 'text-accent-600 dark:text-accent-300' : 'text-foreground dark:text-white'
                                         }`}>
                                         {activity.book_title || 'Unknown Book'}
                                     </span>
@@ -301,11 +301,11 @@ export default function ActivityFeed({ userId, followingIds, limit = 20, showHea
                                         <StarRating rating={activity.metadata.rating} readonly size="sm" />
                                     </div>
                                     {activity.metadata.review_snippet && (
-                                        <p className="text-sm text-slate-300 italic">"{activity.metadata.review_snippet}"</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 italic">"{activity.metadata.review_snippet}"</p>
                                     )}
                                     {/* Fallback if snippet is missing but full review is in metadata desc or elsewhere, though usually we put it in snippet */}
                                     {!activity.metadata.review_snippet && activity.metadata.description && (
-                                        <p className="text-sm text-slate-300 italic">"{activity.metadata.description}"</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 italic">"{activity.metadata.description}"</p>
                                     )}
                                 </div>
                             )}

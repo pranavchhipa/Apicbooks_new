@@ -81,12 +81,12 @@ export default function ProfileSetupModal({ isOpen, userId, onComplete }: Profil
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-background/80 backdrop-blur-xl animate-fade-in">
-            <div className="w-full max-w-lg bg-[#0a0e27]/90 border border-[#1e2749] rounded-2xl shadow-2xl shadow-primary-500/10 overflow-hidden animate-scale-in relative">
+            <div className="w-full max-w-lg bg-[#0a0e27]/90 border border-card-border rounded-2xl shadow-2xl shadow-primary-500/10 overflow-hidden animate-scale-in relative">
                 {/* Decorative background glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary-500/20 rounded-full blur-[100px] pointer-events-none" />
 
                 {/* Progress Bar */}
-                <div className="h-1 bg-[#1e2749] w-full">
+                <div className="h-1 bg-elevated w-full">
                     <div
                         className="h-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-500 ease-out"
                         style={{ width: `${(step / 3) * 100}%` }}
@@ -101,12 +101,12 @@ export default function ProfileSetupModal({ isOpen, userId, onComplete }: Profil
                             {step === 2 && <Target className="w-8 h-8 text-primary-400" />}
                             {step === 3 && <Sparkles className="w-8 h-8 text-primary-400" />}
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">
+                        <h2 className="text-2xl font-bold text-foreground mb-2">
                             {step === 1 && "What should we call you?"}
                             {step === 2 && "Set a Reading Goal"}
                             {step === 3 && "What do you like to read?"}
                         </h2>
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-muted-foreground text-sm">
                             {step === 1 && "Let's personalize your experience."}
                             {step === 2 && "Challenge yourself to read more this year."}
                             {step === 3 && "We'll suggest books based on your taste."}
@@ -117,13 +117,13 @@ export default function ProfileSetupModal({ isOpen, userId, onComplete }: Profil
                     {step === 1 && (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                                <label className="block text-sm font-medium text-foreground/80 mb-2">Full Name</label>
                                 <input
                                     type="text"
                                     value={formData.full_name}
                                     onChange={e => setFormData({ ...formData, full_name: e.target.value })}
                                     placeholder="e.g. Jane Doe"
-                                    className="w-full px-4 py-3 bg-[#141b3d] border border-[#1e2749] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                    className="w-full px-4 py-3 bg-card border border-card-border rounded-xl text-foreground placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
                                     autoFocus
                                 />
                             </div>
@@ -140,15 +140,15 @@ export default function ProfileSetupModal({ isOpen, userId, onComplete }: Profil
                     {step === 2 && (
                         <div className="space-y-6">
                             <div className="flex flex-col items-center justify-center py-4">
-                                <span className="text-6xl font-bold text-white mb-4">{formData.reading_goal}</span>
-                                <span className="text-slate-400 uppercase tracking-widest text-xs font-bold">Books in {new Date().getFullYear()}</span>
+                                <span className="text-6xl font-bold text-foreground mb-4">{formData.reading_goal}</span>
+                                <span className="text-muted-foreground uppercase tracking-widest text-xs font-bold">Books in {new Date().getFullYear()}</span>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
                                     value={formData.reading_goal}
                                     onChange={e => setFormData({ ...formData, reading_goal: parseInt(e.target.value) })}
-                                    className="w-full mt-8 h-2 bg-[#1e2749] rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                    className="w-full mt-8 h-2 bg-card-border rounded-lg appearance-none cursor-pointer accent-primary-500"
                                 />
                             </div>
                             <button
@@ -170,7 +170,7 @@ export default function ProfileSetupModal({ isOpen, userId, onComplete }: Profil
                                         onClick={() => toggleGenre(genre)}
                                         className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all ${formData.favorite_genres.includes(genre)
                                             ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/25'
-                                            : 'bg-[#141b3d] text-slate-400 border-[#1e2749] hover:border-slate-600'
+                                            : 'bg-[#141b3d] text-muted-foreground border-card-border hover:border-slate-600'
                                             }`}
                                     >
                                         {genre}

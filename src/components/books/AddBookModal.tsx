@@ -65,15 +65,15 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded, currentTab 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-md bg-[#0a0e27] border border-[#1e2749] rounded-2xl shadow-2xl overflow-hidden scale-in-center">
+            <div className="w-full max-w-md bg-background dark:bg-[#0c0a14] border border-card-border rounded-2xl shadow-2xl overflow-hidden scale-in-center">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-[#1e2749] bg-[#141b3d]/50">
+                <div className="flex items-center justify-between p-6 border-b border-card-border bg-[#141b3d]/50">
                     <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                         <Plus className="w-5 h-5 text-primary-400" />
                         Add Manually
                     </h2>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#1e2749] text-slate-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-elevated text-slate-400 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -90,7 +90,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded, currentTab 
                                 required
                                 value={formData.title}
                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
+                                className="w-full bg-card border border-card-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
                                 placeholder="Book Title"
                             />
                         </div>
@@ -106,7 +106,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded, currentTab 
                                 required
                                 value={formData.author}
                                 onChange={e => setFormData({ ...formData, author: e.target.value })}
-                                className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
+                                className="w-full bg-card border border-card-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
                                 placeholder="Author Name"
                             />
                         </div>
@@ -123,7 +123,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded, currentTab 
                                     min="1"
                                     value={formData.pageCount}
                                     onChange={e => setFormData({ ...formData, pageCount: e.target.value })}
-                                    className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
+                                    className="w-full bg-card border border-card-border rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors placeholder-slate-600"
                                     placeholder="0"
                                 />
                             </div>
@@ -135,7 +135,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded, currentTab 
                             <select
                                 value={formData.status}
                                 onChange={e => setFormData({ ...formData, status: e.target.value as ReadingStatus })}
-                                className="w-full bg-[#141b3d] border border-[#1e2749] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors appearance-none cursor-pointer"
+                                className="w-full bg-card border border-card-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500 transition-colors appearance-none cursor-pointer"
                             >
                                 <option value="reading">Reading</option>
                                 <option value="wishlist">Want to Read</option>

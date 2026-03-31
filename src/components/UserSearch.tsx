@@ -144,7 +144,7 @@ export default function UserSearch({ currentUserId }: UserSearchProps) {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="Search readers by name..."
-                    className="w-full pl-12 pr-4 py-3 bg-[#0a0e27] border border-[#1e2749] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-background dark:bg-[#0c0a14] border border-card-border rounded-xl text-foreground placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
                 />
                 <button
                     onClick={handleSearch}
@@ -165,7 +165,7 @@ export default function UserSearch({ currentUserId }: UserSearchProps) {
                         return (
                             <div
                                 key={user.id}
-                                className="flex items-center gap-4 p-4 bg-[#141b3d]/40 backdrop-blur-md border border-[#1e2749] rounded-xl hover:border-primary-500/30 hover:bg-[#141b3d]/60 hover:shadow-lg hover:shadow-primary-500/5 transition-all group"
+                                className="flex items-center gap-4 p-4 bg-[#141b3d]/40 backdrop-blur-md border border-card-border rounded-xl hover:border-primary-500/30 hover:bg-[#141b3d]/60 hover:shadow-lg hover:shadow-primary-500/5 transition-all group"
                             >
                                 {/* Avatar */}
                                 <div className="relative">
@@ -179,7 +179,7 @@ export default function UserSearch({ currentUserId }: UserSearchProps) {
                                         />
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                                            <User className="w-6 h-6 text-white" />
+                                            <User className="w-6 h-6 text-foreground" />
                                         </div>
                                     )}
                                     <div className="absolute -bottom-1 -right-1 bg-[#0a0e27] rounded-full p-0.5" title={levelInfo.label}>
@@ -190,15 +190,15 @@ export default function UserSearch({ currentUserId }: UserSearchProps) {
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <h4 className="font-medium text-white truncate">
+                                        <h4 className="font-medium text-foreground truncate">
                                             {user.full_name || 'Anonymous'}
                                         </h4>
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#1e2749] text-slate-300 border border-slate-700">
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated text-foreground/80 border border-slate-700">
                                             {levelInfo.label}
                                         </span>
                                     </div>
                                     {user.bio && (
-                                        <p className="text-sm text-slate-400 line-clamp-1">{user.bio}</p>
+                                        <p className="text-sm text-muted-foreground line-clamp-1">{user.bio}</p>
                                     )}
                                 </div>
 
@@ -207,7 +207,7 @@ export default function UserSearch({ currentUserId }: UserSearchProps) {
                                     onClick={() => isFollowing(user.id) ? handleUnfollow(user.id) : handleFollow(user.id)}
                                     disabled={loadingFollow === user.id}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isFollowing(user.id)
-                                        ? 'bg-slate-700 text-slate-300 hover:bg-red-500/20 hover:text-red-400'
+                                        ? 'bg-slate-700 text-foreground/80 hover:bg-red-500/20 hover:text-red-400'
                                         : 'bg-primary-500 text-white hover:bg-primary-600'
                                         }`}
                                 >
@@ -372,7 +372,7 @@ export function FollowList({ userId, type }: { userId: string; type: 'following'
                                 />
                             ) : (
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-                                    <User className="w-5 h-5 text-white" />
+                                    <User className="w-5 h-5 text-foreground" />
                                 </div>
                             )}
                             <div className="absolute -bottom-1 -right-1 bg-[#0a0e27] rounded-full p-0.5" title={levelInfo.label}>
@@ -381,15 +381,15 @@ export function FollowList({ userId, type }: { userId: string; type: 'following'
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                                <h4 className="font-medium text-white truncate">
+                                <h4 className="font-medium text-foreground truncate">
                                     {user.full_name || 'Anonymous'}
                                 </h4>
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#1e2749] text-slate-300 border border-slate-700">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated text-foreground/80 border border-slate-700">
                                     {levelInfo.label}
                                 </span>
                             </div>
                             {user.bio && (
-                                <p className="text-xs text-slate-400 line-clamp-1">{user.bio}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-1">{user.bio}</p>
                             )}
                         </div>
                     </Link>

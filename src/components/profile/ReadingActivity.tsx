@@ -203,7 +203,7 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
     }, [books, readingSessions, timeRange, selectedYear, viewMode, totalPeriod]);
 
     return (
-        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-[#1e2749] rounded-2xl p-6 lg:col-span-2">
+        <div className="bg-gradient-to-br from-[#141b3d]/80 to-[#0d1128]/80 backdrop-blur-xl border border-card-border rounded-2xl p-6 lg:col-span-2">
 
             {/* Header with Filters */}
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-8">
@@ -219,12 +219,12 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
 
                 <div className="flex flex-wrap items-center gap-3">
                     {/* View Mode Toggle */}
-                    <div className="flex items-center gap-1 bg-[#0a0e27]/50 p-1 rounded-xl border border-[#1e2749]">
+                    <div className="flex items-center gap-1 bg-[#0a0e27]/50 p-1 rounded-xl border border-card-border">
                         <button
                             onClick={() => setViewMode('books')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${viewMode === 'books'
                                 ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                : 'text-slate-400 hover:text-white hover:bg-[#1e2749]'
+                                : 'text-slate-400 hover:text-white hover:bg-elevated'
                                 }`}
                         >
                             <BookOpen className="w-3 h-3" />
@@ -234,7 +234,7 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
                             onClick={() => setViewMode('time')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${viewMode === 'time'
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                : 'text-slate-400 hover:text-white hover:bg-[#1e2749]'
+                                : 'text-slate-400 hover:text-white hover:bg-elevated'
                                 }`}
                         >
                             <Clock className="w-3 h-3" />
@@ -242,17 +242,17 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
                         </button>
                     </div>
 
-                    <div className="h-6 w-px bg-[#1e2749] hidden sm:block" />
+                    <div className="h-6 w-px bg-elevated hidden sm:block" />
 
                     {/* Time Range Toggle */}
-                    <div className="flex items-center gap-1 bg-[#0a0e27]/50 p-1 rounded-xl border border-[#1e2749]">
+                    <div className="flex items-center gap-1 bg-[#0a0e27]/50 p-1 rounded-xl border border-card-border">
                         {(['week', 'month', 'year'] as TimeRange[]).map((range) => (
                             <button
                                 key={range}
                                 onClick={() => setTimeRange(range)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${timeRange === range
                                     ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-[#1e2749]'
+                                    : 'text-slate-400 hover:text-white hover:bg-elevated'
                                     }`}
                             >
                                 {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -315,7 +315,7 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
             </div>
 
             {/* Summary Stats Footer */}
-            <div className="mt-6 pt-6 border-t border-[#1e2749] grid grid-cols-3 gap-4">
+            <div className="mt-6 pt-6 border-t border-card-border grid grid-cols-3 gap-4">
                 <div className="text-center">
                     <p className="text-xs text-slate-500 mb-1">
                         {viewMode === 'books' ? 'Total Books' : 'Total Hours'}
@@ -324,7 +324,7 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
                         {viewMode === 'books' ? totalPeriod : totalPeriod.toFixed(1)}
                     </p>
                 </div>
-                <div className="text-center border-l border-[#1e2749]">
+                <div className="text-center border-l border-card-border">
                     <p className="text-xs text-slate-500 mb-1">Daily Avg</p>
                     <p className="text-2xl font-bold text-white">
                         {timeRange === 'week' ? (totalPeriod / 7).toFixed(1)
@@ -335,7 +335,7 @@ export default function ReadingActivity({ books, userId }: ReadingActivityProps)
                         </span>
                     </p>
                 </div>
-                <div className="text-center border-l border-[#1e2749]">
+                <div className="text-center border-l border-card-border">
                     <p className="text-xs text-slate-500 mb-1">Trend</p>
                     <div className={`flex items-center justify-center gap-1 ${trendStats.percentage >= 0 ? 'text-green-400' : 'text-rose-400'}`}>
                         <TrendingUp className={`w-3 h-3 ${trendStats.percentage < 0 ? 'rotate-180' : ''}`} />
