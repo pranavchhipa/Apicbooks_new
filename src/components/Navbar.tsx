@@ -35,7 +35,8 @@ export default function Navbar({ user }: { user: any }) {
         }`}>
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between h-16 md:h-[72px]">
-                    <Link href="/" className="flex-shrink-0 group">
+                    <Link href="/" className="flex-shrink-0 group flex items-center gap-2">
+                        <img src="/logo-apicbooks.png" alt="ApicBooks" className="h-8 w-8 rounded-md" />
                         <span className="font-display text-xl md:text-[22px] font-extrabold text-white tracking-tight group-hover:text-amber-400 transition-colors">
                             ApicBooks
                         </span>

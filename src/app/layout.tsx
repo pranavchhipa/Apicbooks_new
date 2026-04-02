@@ -13,9 +13,22 @@ export const metadata: Metadata = {
     title: 'ApicBooks - Your Midnight Library',
     description: 'The most beautiful way to track your reading, join book clubs, discover your next favorite story, and connect with fellow readers.',
     icons: {
-        icon: '/icon.jpg',
-        shortcut: '/icon.jpg',
-        apple: '/icon.jpg',
+        icon: '/favicon.png',
+        shortcut: '/favicon.png',
+        apple: '/apple-touch-icon.png',
+    },
+    openGraph: {
+        title: 'ApicBooks - Your Midnight Library',
+        description: 'Track your reading, join book clubs, and discover your next favorite story.',
+        images: [{ url: '/og-image.png', width: 800, height: 600, alt: 'ApicBooks Logo' }],
+        type: 'website',
+        siteName: 'ApicBooks',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'ApicBooks - Your Midnight Library',
+        description: 'Track your reading, join book clubs, and discover your next favorite story.',
+        images: ['/og-image.png'],
     },
 };
 

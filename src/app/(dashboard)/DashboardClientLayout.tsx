@@ -155,9 +155,10 @@ export default function DashboardClientLayout({
                             <div className="h-16 flex items-center justify-between border-b border-white/[0.06] px-4">
                                 <Link href="/dashboard" className="flex items-center flex-1 min-w-0">
                                     {isDesktopCollapsed ? (
-                                        <LogoIcon className="w-9 h-9 flex-shrink-0" />
+                                        <img src="/logo-apicbooks.png" alt="ApicBooks" className="w-9 h-9 rounded-md flex-shrink-0" />
                                     ) : (
-                                        <span className="font-display font-extrabold text-white text-xl tracking-tight">
+                                        <span className="flex items-center gap-2 font-display font-extrabold text-white text-xl tracking-tight">
+                                            <img src="/logo-apicbooks.png" alt="ApicBooks" className="h-8 w-8 rounded-md" />
                                             ApicBooks
                                         </span>
                                     )}
@@ -307,7 +308,8 @@ export default function DashboardClientLayout({
                                 </button>
 
                                 {/* Mobile logo */}
-                                <span className="font-display font-extrabold text-white text-lg tracking-tight lg:hidden">
+                                <span className="flex items-center gap-2 font-display font-extrabold text-white text-lg tracking-tight lg:hidden">
+                                    <img src="/logo-apicbooks.png" alt="ApicBooks" className="h-7 w-7 rounded-md" />
                                     ApicBooks
                                 </span>
 
