@@ -28,10 +28,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // TEMPORARY: Auth disabled for preview — re-enable when done
-    // if (!user && !bypassAuth) {
-    //     redirect('/auth/login');
-    // }
+    if (!user && !bypassAuth) {
+        redirect('/auth/login');
+    }
 
     let profile = null;
     if (user) {

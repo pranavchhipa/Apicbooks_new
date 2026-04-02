@@ -48,10 +48,9 @@ export async function updateSession(request: NextRequest) {
     const bypassAuth = request.nextUrl.searchParams.get('bypass') === 'true' ||
         request.cookies.get('bypass-auth')?.value === 'true';
 
-    // TEMPORARY: Auth disabled for preview — re-enable when done
-    // if (isProtectedRoute && !user && !bypassAuth) {
-    //     return NextResponse.redirect(new URL('/auth/login', request.url));
-    // }
+    if (isProtectedRoute && !user && !bypassAuth) {
+        return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
 
     // Set bypass cookie if ?bypass=true is in URL
     if (bypassAuth && !request.cookies.get('bypass-auth')?.value) {
